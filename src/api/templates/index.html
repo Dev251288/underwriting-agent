@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Application Queue — IndiaBank</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body { font-family: 'Inter', system-ui, sans-serif; background: #0C0B1D; }
+    .fade-in { animation: fadeIn 0.3s ease-in; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: #0C0B1D; }
+    ::-webkit-scrollbar-thumb { background: #3D2F7A; border-radius: 3px; }
+    .app-card { background: #13112A; border: 1px solid rgba(99,79,176,0.25); transition: border-color 0.15s; }
+    .app-card:hover { border-color: rgba(139,92,246,0.5); }
+    .section-bg { background: #0F0E24; border: 1px solid rgba(99,79,176,0.2); }
+    .stat-card { background: #13112A; border: 1px solid rgba(99,79,176,0.2); }
+    .collapse-toggle .chevron { transition: transform 0.2s; }
+    .collapse-toggle.is-collapsed .chevron { transform: rotate(-90deg); }
+  </style>
+</head>
+<body class="min-h-screen text-slate-100 pb-16">
+
+<!-- HEADER -->
+<header class="sticky top-0 z-50 border-b shadow-2xl" style="background:#100F27;border-color:rgba(99,79,176,0.3)">
+  <div class="max-w-screen-xl mx-auto px-6 py-3 flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <!-- Jupiter-style brand mark -->
+      <div class="w-9 h-9 rounded-xl flex items-center justify-center shadow-lg flex-shrink-0"
+           style="background:linear-gradient(135deg,#7C3AED,#4F46E5)">
+        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 21V9l9-6 9 6v12M9 21V12h6v9"/>
+        </svg>
+      </div>
+      <div>
+        <p class="text-white font-bold text-sm leading-none">IndiaBank</p>
+        <p class="text-violet-400 text-xs leading-none mt-0.5">Credit Underwriting</p>
+      </div>
+      <div class="h-5 w-px mx-1" style="background:rgba(99,79,176,0.4)"></div>
+      <p class="text-slate-200 text-sm font-semibold">Application Queue</p>
+    </div>
+    <div class="flex items-center gap-4">
+      <div id="stats-bar" class="text-xs text-slate-500">Loading…</div>
+      <div class="flex items-center gap-2 px-3 py-1.5 rounded-lg" style="background:#1A1838">
+        <div class="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold text-white"
+             style="background:linear-gradient(135deg,#7C3AED,#4F46E5)">AK</div>
+        <div class="text-right hidden sm:block">
+          <p class="text-xs font-semibold text-slate-200 leading-none">Ananya Krishnan</p>
+          <p class="text-xs text-violet-400 leading-none mt-0.5">Senior Underwriter</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main class="max-w-screen-xl mx-auto px-6 mt-6 space-y-6 fade-in">
+
+  <!-- METRIC ROW -->
+  <div class="grid grid-cols-2 sm:grid-cols-4 gap-3" id="metric-row">
+    <div class="stat-card rounded-2xl px-5 py-4">
+      <p class="text-xs text-violet-400 uppercase tracking-wider font-medium mb-1">Active Cases</p>
+      <p class="text-2xl font-bold text-white" id="m-active">—</p>
+      <p class="text-xs text-slate-500 mt-0.5">awaiting decision</p>
+    </div>
+    <div class="stat-card rounded-2xl px-5 py-4">
+      <p class="text-xs text-violet-400 uppercase tracking-wider font-medium mb-1">Opportunity Size</p>
+      <p class="text-2xl font-bold text-white" id="m-opportunity">—</p>
+      <p class="text-xs text-slate-500 mt-0.5">total loan value active</p>
+    </div>
+    <div class="stat-card rounded-2xl px-5 py-4">
+      <p class="text-xs text-orange-400 uppercase tracking-wider font-medium mb-1">Overdue</p>
+      <p class="text-2xl font-bold text-white" id="m-overdue">—</p>
+      <p class="text-xs text-slate-500 mt-0.5">past deadline</p>
+    </div>
+    <div class="stat-card rounded-2xl px-5 py-4">
+      <p class="text-xs text-violet-400 uppercase tracking-wider font-medium mb-1">Avg Daily Throughput</p>
+      <p class="text-2xl font-bold text-white" id="m-throughput">—</p>
+      <p class="text-xs text-slate-500 mt-0.5" id="m-throughput-label">cases/day</p>
+    </div>
+  </div>
+
+  <!-- RISK LEGEND -->
+  <div class="rounded-xl px-4 py-3 flex flex-wrap gap-x-6 gap-y-2" style="background:#13112A;border:1px solid rgba(99,79,176,0.15)">
+    <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider self-center mr-1">Risk Levels:</p>
+    <span class="flex items-center gap-1.5 text-xs text-slate-400">
+      <span class="w-2.5 h-2.5 rounded-full bg-green-500 flex-shrink-0"></span>
+      <strong class="text-green-400">Low</strong> — All checks pass, CIBIL 700+, FOIR &lt;40%, LTV within RBI cap
+    </span>
+    <span class="flex items-center gap-1.5 text-xs text-slate-400">
+      <span class="w-2.5 h-2.5 rounded-full bg-amber-500 flex-shrink-0"></span>
+      <strong class="text-amber-400">Medium</strong> — Minor concerns, CIBIL 650–700 or FOIR 40–50%
+    </span>
+    <span class="flex items-center gap-1.5 text-xs text-slate-400">
+      <span class="w-2.5 h-2.5 rounded-full bg-red-500 flex-shrink-0"></span>
+      <strong class="text-red-400">High</strong> — Multiple concerns, borderline metrics
+    </span>
+    <span class="flex items-center gap-1.5 text-xs text-slate-400">
+      <span class="w-2.5 h-2.5 rounded-full bg-red-900 flex-shrink-0"></span>
+      <strong class="text-red-300">Critical</strong> — Fraud flags, CIBIL &lt;600, LTV breach, or policy violation
+    </span>
+  </div>
+
+  <!-- ACTIVE APPLICATIONS -->
+  <section>
+    <button class="collapse-toggle w-full section-bg rounded-2xl px-5 py-3.5 flex items-center justify-between hover:opacity-90 transition-opacity"
+            onclick="toggleSection('active')">
+      <div class="flex items-center gap-3">
+        <h2 class="text-sm font-bold text-slate-200">Active Applications</h2>
+        <span id="badge-active" class="text-xs font-bold px-2.5 py-0.5 rounded-full"
+              style="background:rgba(124,58,237,0.25);color:#A78BFA">0</span>
+        <span id="opportunity-badge" class="text-xs text-violet-400 font-medium hidden"></span>
+      </div>
+      <svg class="chevron w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+      </svg>
+    </button>
+    <div id="body-active" class="mt-2 space-y-2">
+      <div id="list-active"></div>
+      <p id="empty-active" class="hidden text-sm text-slate-600 italic px-2 py-4">No active cases.</p>
+    </div>
+  </section>
+
+  <!-- CLOSED -->
+  <section>
+    <button class="collapse-toggle is-collapsed w-full section-bg rounded-2xl px-5 py-3.5 flex items-center justify-between hover:opacity-90 transition-opacity"
+            onclick="toggleSection('closed')">
+      <div class="flex items-center gap-3">
+        <h2 class="text-sm font-bold text-slate-400">Closed</h2>
+        <span id="badge-closed" class="text-xs font-bold px-2.5 py-0.5 rounded-full bg-slate-700 text-slate-400">0</span>
+      </div>
+      <svg class="chevron w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+      </svg>
+    </button>
+    <div id="body-closed" class="hidden mt-2 space-y-2">
+      <div id="list-closed"></div>
+      <p id="empty-closed" class="hidden text-sm text-slate-600 italic px-2 py-4">No closed cases.</p>
+    </div>
+  </section>
+
+</main>
+
+<!-- ERROR OVERLAY -->
+<div id="error-overlay" class="hidden fixed inset-0 flex items-center justify-center z-50 p-6" style="background:rgba(12,11,29,0.93)">
+  <div class="rounded-2xl p-8 max-w-lg w-full text-center shadow-2xl" style="background:#13112A;border:1px solid rgba(239,68,68,0.4)">
+    <div class="text-4xl mb-4">⚠️</div>
+    <p class="text-red-300 font-semibold text-lg mb-2">Failed to load queue</p>
+    <p class="text-slate-400 text-sm mb-4" id="error-msg">—</p>
+    <p class="text-slate-600 text-xs">
+      Run <code class="font-mono px-2 py-0.5 rounded text-slate-300" style="background:#1e1c3a">python main.py seed</code>
+      then <code class="font-mono px-2 py-0.5 rounded text-slate-300" style="background:#1e1c3a">python main.py serve</code>
+    </p>
+  </div>
+</div>
+
+<script>
+"use strict";
+
+// ── Utilities ──────────────────────────────────────────────────────────────────
+function formatINR(n) {
+  if (n == null) return "—";
+  if (n >= 10_000_000) return "₹" + (n / 10_000_000).toFixed(2) + " Cr";
+  if (n >= 100_000)    return "₹" + (n / 100_000).toFixed(1) + "L";
+  return "₹" + n.toLocaleString("en-IN");
+}
+function humanise(s) {
+  if (!s) return "—";
+  return s.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+}
+function formatDate(iso) {
+  if (!iso) return "";
+  try { return new Date(iso).toLocaleDateString("en-IN", { day:"2-digit", month:"short", year:"numeric" }); }
+  catch { return ""; }
+}
+
+// ── Colour maps ────────────────────────────────────────────────────────────────
+const RISK_STYLE = {
+  low:      { bg:"rgba(34,197,94,0.15)", text:"#86EFAC", border:"rgba(34,197,94,0.3)" },
+  medium:   { bg:"rgba(245,158,11,0.15)", text:"#FCD34D", border:"rgba(245,158,11,0.3)" },
+  high:     { bg:"rgba(239,68,68,0.15)", text:"#FCA5A5", border:"rgba(239,68,68,0.3)" },
+  critical: { bg:"rgba(185,28,28,0.2)", text:"#FCA5A5", border:"rgba(185,28,28,0.4)" },
+};
+
+const STATUS_LABEL = {
+  pending_manager_decision:   "Awaiting your review",
+  customer_followup_required: "Awaiting customer documents",
+  conditions_pending:         "Awaiting condition verification",
+  committee_review:           "Awaiting Credit Committee",
+  approved:                   "Approved",
+  rejected:                   "Rejected",
+};
+
+const VERIFY_STYLE = {
+  verified:           { bg:"rgba(34,197,94,0.15)", text:"#86EFAC" },
+  partially_verified: { bg:"rgba(245,158,11,0.12)", text:"#FCD34D" },
+  failed:             { bg:"rgba(239,68,68,0.15)", text:"#FCA5A5" },
+  pending:            { bg:"rgba(100,116,139,0.2)", text:"#94A3B8" },
+};
+
+function verifyChip(label, status) {
+  const s = (status || "pending").toLowerCase();
+  const st = VERIFY_STYLE[s] || VERIFY_STYLE.pending;
+  const icon = s === "verified" ? "✓" : s === "failed" ? "✗" : "~";
+  return `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-semibold"
+               style="background:${st.bg};color:${st.text}">${icon} ${label}</span>`;
+}
+
+// ── Urgency badge ──────────────────────────────────────────────────────────────
+function urgencyBadge(s) {
+  const dl = s.deadline_info;
+  const sc = s.urgency_score;
+
+  if (sc === 4) {
+    const approved = s.status === "approved";
+    return approved
+      ? `<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold" style="background:rgba(34,197,94,0.15);color:#86EFAC">✓ Approved</span>`
+      : `<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold" style="background:rgba(239,68,68,0.15);color:#FCA5A5">✗ Rejected</span>`;
+  }
+  if (sc === 2) {
+    return `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold" style="background:rgba(99,102,241,0.2);color:#A5B4FC">● New</span>`;
+  }
+  if (!dl) {
+    return `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-slate-700 text-slate-300">Active</span>`;
+  }
+  if (dl.is_overdue) {
+    const d = Math.abs(dl.days_remaining);
+    return `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold" style="background:rgba(185,28,28,0.35);color:#FCA5A5;border:1px solid rgba(239,68,68,0.4)">⚠ Overdue ${d}d</span>`;
+  }
+  if (dl.days_remaining <= 3) {
+    return `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold" style="background:rgba(234,88,12,0.2);color:#FDBA74;border:1px solid rgba(234,88,12,0.35)">⏰ ${dl.days_remaining}d left</span>`;
+  }
+  return `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-slate-700/70 text-slate-300">⏰ ${dl.days_remaining}d left</span>`;
+}
+
+// ── Application row card ───────────────────────────────────────────────────────
+function buildRow(s) {
+  const isActive = s.urgency_score < 4;
+  const risk = (s.risk_level || "").toLowerCase();
+  const rs = RISK_STYLE[risk];
+  const statusLabel = STATUS_LABEL[s.status] || humanise(s.status);
+
+  // Loan context: amount + purpose
+  const loanContext = s.loan_purpose
+    ? `${formatINR(s.loan_amount)} · ${humanise(s.loan_purpose)}`
+    : formatINR(s.loan_amount);
+
+  // Status chips
+  const chips = [
+    verifyChip("KYC", s.kyc_status),
+    verifyChip("Finance", s.financial_status),
+    verifyChip("Property", s.property_status),
+  ].join("");
+
+  // CTA button
+  const btn = isActive
+    ? `<a href="/case?id=${s.application_id}"
+          class="flex-shrink-0 px-4 py-2 rounded-xl text-xs font-bold text-white transition-all"
+          style="background:#1D4ED8;border:1px solid rgba(59,130,246,0.4)">Open →</a>`
+    : `<a href="/case?id=${s.application_id}"
+          class="flex-shrink-0 px-4 py-2 rounded-xl text-xs font-semibold text-slate-300 transition-all"
+          style="background:#1e1c3a;border:1px solid rgba(99,79,176,0.3)">View</a>`;
+
+  // Exception tag
+  const exTag = s.is_exception
+    ? `<span class="px-1.5 py-0.5 rounded text-xs font-semibold" style="background:rgba(124,58,237,0.2);color:#C4B5FD">Exception</span>`
+    : "";
+
+  // Risk pill
+  const riskTag = rs
+    ? `<span class="px-1.5 py-0.5 rounded text-xs font-semibold uppercase"
+             style="background:${rs.bg};color:${rs.text};border:1px solid ${rs.border}">${risk}</span>`
+    : "";
+
+  // CIBIL
+  const cibilTag = s.cibil_score
+    ? `<span class="text-slate-500 text-xs">CIBIL <strong class="text-slate-300">${s.cibil_score}</strong></span>`
+    : "";
+
+  // Deadline
+  let deadlineTag = "";
+  const dl = s.deadline_info;
+  if (dl) {
+    if (dl.is_overdue) {
+      deadlineTag = `<span class="text-red-400 text-xs font-medium">Deadline passed ${Math.abs(dl.days_remaining)}d ago</span>`;
+    } else {
+      deadlineTag = `<span class="text-slate-500 text-xs">Due ${formatDate(dl.deadline)}</span>`;
+    }
+  }
+
+  return `
+  <div class="app-card rounded-xl px-5 py-4 flex items-center gap-4">
+    <div class="w-28 flex-shrink-0">${urgencyBadge(s)}</div>
+    <div class="flex-1 min-w-0">
+      <div class="flex items-center gap-2 flex-wrap mb-1">
+        <p class="text-sm font-semibold text-slate-100">${s.applicant_name}</p>
+        ${riskTag}${exTag}
+      </div>
+      <p class="text-xs text-slate-400 mb-2">${loanContext} &nbsp;·&nbsp; <span class="text-slate-500">${statusLabel}</span></p>
+      <div class="flex items-center gap-2 flex-wrap">
+        ${chips}
+        ${cibilTag ? `<span class="text-slate-700 text-xs mx-0.5">·</span>${cibilTag}` : ""}
+        ${deadlineTag ? `<span class="text-slate-700 text-xs mx-0.5">·</span>${deadlineTag}` : ""}
+      </div>
+    </div>
+    ${btn}
+  </div>`;
+}
+
+// ── Section collapse toggle ────────────────────────────────────────────────────
+function toggleSection(name) {
+  const body = document.getElementById("body-" + name);
+  const btn  = document.querySelector(`[onclick="toggleSection('${name}')"]`);
+  const hidden = body.classList.contains("hidden");
+  body.classList.toggle("hidden", !hidden);
+  btn.classList.toggle("is-collapsed", hidden);
+}
+
+// ── Render ─────────────────────────────────────────────────────────────────────
+function render(apps) {
+  const active = apps.filter(s => s.urgency_score < 4);
+  const closed = apps.filter(s => s.urgency_score === 4);
+
+  // Metrics
+  const overdue   = active.filter(s => s.urgency_score === 0).length;
+  const activeLTV = active.reduce((sum, s) => sum + (s.loan_amount || 0), 0);
+
+  // Daily throughput: cases/day based on actual data span
+  const allDates   = apps.map(s => { try { return new Date(s.created_at).getTime(); } catch { return Date.now(); } });
+  const oldestMs   = Math.min(...allDates);
+  const daySpan    = Math.max(1, (Date.now() - oldestMs) / 86400_000);
+  const totalClosed = closed.length;
+  // Show rate only when there's enough data; otherwise show count with note
+  const dailyRate  = daySpan >= 3 ? (totalClosed / daySpan).toFixed(1) : null;
+
+  document.getElementById("m-active").textContent      = active.length;
+  document.getElementById("m-opportunity").textContent = formatINR(activeLTV);
+  document.getElementById("m-overdue").textContent     = overdue;
+  document.getElementById("m-throughput").textContent  = dailyRate !== null ? dailyRate : totalClosed;
+  document.getElementById("m-throughput-label").textContent =
+    dailyRate !== null
+      ? `cases/day · ${totalClosed} closed total`
+      : `closed (rate after 3 days)`;
+
+  // Stats bar
+  document.getElementById("stats-bar").innerHTML =
+    `<span class="${overdue > 0 ? "text-orange-400" : "text-slate-500"}">${overdue} overdue</span>
+     <span class="mx-2 text-slate-700">·</span>
+     <span class="text-violet-400">${active.length} active</span>
+     <span class="mx-2 text-slate-700">·</span>
+     <span class="text-slate-500">${closed.length} closed</span>`;
+
+  // Active section
+  document.getElementById("badge-active").textContent = active.length;
+  if (activeLTV > 0) {
+    const ob = document.getElementById("opportunity-badge");
+    ob.textContent = formatINR(activeLTV) + " opportunity";
+    ob.classList.remove("hidden");
+  }
+  if (active.length) {
+    document.getElementById("list-active").innerHTML = active.map(buildRow).join("");
+  } else {
+    document.getElementById("empty-active").classList.remove("hidden");
+  }
+
+  // Closed section
+  document.getElementById("badge-closed").textContent = closed.length;
+  if (closed.length) {
+    document.getElementById("list-closed").innerHTML = closed.map(buildRow).join("");
+  } else {
+    document.getElementById("empty-closed").classList.remove("hidden");
+  }
+}
+
+// ── Boot ───────────────────────────────────────────────────────────────────────
+document.addEventListener("DOMContentLoaded", async () => {
+  try {
+    const res = await fetch("/api/applications");
+    if (!res.ok) throw new Error((await res.json().catch(() => ({}))).detail || res.statusText);
+    const apps = await res.json();
+    if (!apps.length) throw new Error("No applications found. Run 'python main.py seed' first.");
+    render(apps);
+  } catch (err) {
+    document.getElementById("error-msg").textContent = err.message;
+    document.getElementById("error-overlay").classList.remove("hidden");
+  }
+});
+</script>
+</body>
+</html>

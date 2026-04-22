@@ -1,0 +1,1833 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Application Review — IndiaBank</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body { font-family: 'Inter', system-ui, sans-serif; background: #0C0B1D; }
+    .progress-bar { transition: width 0.8s cubic-bezier(0.4,0,0.2,1); }
+    .fade-in { animation: fadeIn 0.4s ease-in; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+    .scorecard-detail { display: none; }
+    .scorecard-detail.open { display: block; }
+    .chevron-icon { transition: transform 0.2s ease; }
+    .chevron-icon.open { transform: rotate(180deg); }
+    .ring-selected { outline: 2px solid white; outline-offset: 2px; }
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #0C0B1D; }
+    ::-webkit-scrollbar-thumb { background: #3D2F7A; border-radius: 3px; }
+    .card { background: #13112A; border: 1px solid rgba(99,79,176,0.25); }
+    .card-dark { background: #0F0E24; border: 1px solid rgba(99,79,176,0.2); }
+    .panel-bg { background: rgba(15,14,36,0.97); border-top: 1px solid rgba(99,79,176,0.3); }
+    .tooltip-wrap { position: relative; }
+    .tooltip-wrap:hover .tooltip-box { display: block; }
+    .tooltip-box { display: none; position: absolute; bottom: 130%; left: 50%; transform: translateX(-50%);
+      background: #1e1c3a; border: 1px solid rgba(99,79,176,0.4); color: #CBD5E1;
+      font-size: 11px; padding: 6px 10px; border-radius: 8px; white-space: nowrap; z-index: 100;
+      max-width: 280px; white-space: normal; text-align: center; }
+    .tooltip-box::after { content: ''; position: absolute; top: 100%; left: 50%; transform: translateX(-50%);
+      border: 5px solid transparent; border-top-color: #1e1c3a; }
+  </style>
+</head>
+<body class="min-h-screen text-slate-100 pb-40">
+
+<!-- ═══════════════════════════════════════════════════════ HEADER ═══ -->
+<header class="sticky top-0 z-50 border-b shadow-2xl" style="background:#100F27;border-color:rgba(99,79,176,0.3)">
+  <div class="max-w-screen-xl mx-auto px-6 py-3 flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <a href="/" class="flex items-center gap-1.5 text-slate-400 hover:text-violet-300 transition-colors group mr-1">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+        </svg>
+        <span class="text-xs group-hover:text-violet-300">Application Queue</span>
+      </a>
+      <div class="h-5 w-px" style="background:rgba(99,79,176,0.4)"></div>
+      <div class="w-8 h-8 rounded-xl flex items-center justify-center shadow-lg"
+           style="background:linear-gradient(135deg,#7C3AED,#4F46E5)">
+        <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 21V9l9-6 9 6v12M9 21V12h6v9"/>
+        </svg>
+      </div>
+      <div>
+        <p class="text-white font-bold text-sm leading-none">IndiaBank</p>
+        <p class="text-violet-400 text-xs leading-none mt-0.5">Application Review</p>
+      </div>
+    </div>
+    <div class="flex items-center gap-3">
+      <span class="text-slate-500 text-xs" id="hdr-timestamp">—</span>
+      <span id="hdr-status-badge" class="px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wide bg-slate-700 text-slate-300">—</span>
+      <span id="hdr-app-id" class="px-3 py-1 rounded-lg text-sm font-mono font-bold"
+            style="background:rgba(99,79,176,0.2);color:#A78BFA;border:1px solid rgba(124,58,237,0.4)">—</span>
+      <div class="flex items-center gap-2 px-3 py-1.5 rounded-lg" style="background:#1A1838">
+        <div class="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold text-white"
+             style="background:linear-gradient(135deg,#7C3AED,#4F46E5)">AK</div>
+        <div class="hidden sm:block">
+          <p class="text-xs font-semibold text-slate-200 leading-none">Ananya Krishnan</p>
+          <p class="text-xs text-violet-400 leading-none mt-0.5">Senior Underwriter</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- ══════════════════════════════════════ ACTION REQUIRED BANNER ═══ -->
+<div id="action-banner" class="hidden">
+  <div id="action-banner-inner" class="border-b px-6 py-3">
+    <div class="max-w-screen-xl mx-auto flex items-center justify-between gap-4">
+      <div class="flex items-center gap-3">
+        <span id="action-banner-icon" class="text-xl flex-shrink-0">⏰</span>
+        <div>
+          <p class="font-semibold text-sm" id="action-banner-title">Action Required</p>
+          <p class="text-xs opacity-80" id="action-banner-detail">—</p>
+        </div>
+      </div>
+      <span id="action-banner-countdown" class="font-mono font-bold text-sm px-3 py-1.5 rounded-lg flex-shrink-0" style="background:rgba(0,0,0,0.25)">—</span>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════ BORROWER STRIP ═══ -->
+<section style="background:#0F0E24;border-bottom:1px solid rgba(99,79,176,0.2)">
+  <div class="max-w-screen-xl mx-auto px-6 py-4">
+    <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-x-6 gap-y-3" id="borrower-strip"></div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════ RECOMMENDATION BANNER ═══ -->
+<section class="max-w-screen-xl mx-auto px-6 mt-6 fade-in">
+  <div id="rec-banner" class="rounded-2xl border-l-8 border-slate-700 card p-6 shadow-2xl">
+    <div class="flex flex-wrap items-center justify-between gap-4">
+      <div class="flex items-center gap-3 flex-wrap">
+        <span id="rec-risk-badge" class="px-4 py-2 rounded-xl font-bold text-sm uppercase tracking-widest bg-slate-700 text-slate-300">—</span>
+        <svg class="w-4 h-4 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+        </svg>
+        <span id="rec-rec-badge" class="px-4 py-2 rounded-xl font-bold text-sm uppercase tracking-widest bg-slate-700 text-slate-300">—</span>
+        <span class="text-slate-500 text-xs italic">AI-generated · manager decision required</span>
+      </div>
+      <span class="text-slate-600 text-xs" id="rec-generated-at">—</span>
+    </div>
+    <p class="mt-4 text-slate-200 leading-relaxed text-sm" id="rec-summary">Loading…</p>
+    <!-- Risk level explanation -->
+    <div class="mt-3 pt-3 border-t flex flex-wrap gap-x-5 gap-y-1.5" style="border-color:rgba(99,79,176,0.2)">
+      <p class="text-xs text-slate-600 w-full font-medium">Risk level guide:</p>
+      <span class="text-xs text-slate-500"><span class="text-green-400 font-semibold">Low</span> — CIBIL 700+, FOIR &lt;40%, LTV within cap, clean docs</span>
+      <span class="text-xs text-slate-500"><span class="text-amber-400 font-semibold">Medium</span> — CIBIL 650–700 or FOIR 40–50%</span>
+      <span class="text-xs text-slate-500"><span class="text-red-400 font-semibold">High</span> — Multiple borderline metrics</span>
+      <span class="text-xs text-slate-500"><span class="text-red-300 font-semibold">Critical</span> — Fraud/CIBIL &lt;600/LTV breach</span>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════ VERIFICATION SCORECARD ═══ -->
+<section class="max-w-screen-xl mx-auto px-6 mt-5 space-y-2 fade-in">
+  <p class="text-xs font-semibold uppercase tracking-widest mb-3" style="color:rgba(167,139,250,0.6)">Verification Scorecard</p>
+
+  <!-- KYC Row -->
+  <div class="card rounded-2xl overflow-hidden shadow-lg">
+    <button class="scorecard-toggle w-full flex items-center justify-between px-5 py-4 hover:bg-white/5 transition-colors text-left" data-target="kyc-detail">
+      <div class="flex items-center gap-4 min-w-0">
+        <div class="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style="background:rgba(99,79,176,0.25)">
+          <svg class="w-4 h-4 text-violet-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+          </svg>
+        </div>
+        <div class="min-w-0">
+          <p class="text-xs text-slate-500 uppercase tracking-wider font-medium">KYC Verification</p>
+          <p class="text-sm text-slate-200 mt-0.5 truncate" id="kyc-summary-text">—</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-3 flex-shrink-0 ml-4">
+        <span id="kyc-status-pill" class="px-2.5 py-1 rounded-full text-xs font-bold bg-slate-700 text-slate-300">—</span>
+        <svg class="chevron-icon w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+        </svg>
+      </div>
+    </button>
+    <div id="kyc-detail" class="scorecard-detail border-t px-5 py-4" style="border-color:rgba(99,79,176,0.2)">
+      <ul class="space-y-2 text-sm" id="kyc-checklist"></ul>
+      <!-- PAN shown inside KYC detail, not as identifier -->
+      <div id="kyc-pan-block" class="mt-3 hidden">
+        <p class="text-xs text-slate-600 uppercase tracking-wider mb-1">PAN</p>
+        <p class="text-xs font-mono text-slate-400" id="kyc-pan-value">—</p>
+      </div>
+      <div id="kyc-flags-block" class="mt-4 hidden">
+        <p class="text-xs text-red-400 uppercase tracking-wider mb-2 font-semibold">Risk Flags</p>
+        <ul id="kyc-flag-list" class="text-xs text-red-300 space-y-1.5"></ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- Financials Row -->
+  <div class="card rounded-2xl overflow-hidden shadow-lg">
+    <button class="scorecard-toggle w-full flex items-center justify-between px-5 py-4 hover:bg-white/5 transition-colors text-left" data-target="fin-detail">
+      <div class="flex items-center gap-4 min-w-0">
+        <div class="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style="background:rgba(16,185,129,0.15)">
+          <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+          </svg>
+        </div>
+        <div class="min-w-0">
+          <p class="text-xs text-slate-500 uppercase tracking-wider font-medium">Financials</p>
+          <p class="text-sm text-slate-200 mt-0.5 truncate" id="fin-summary-text">—</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-3 flex-shrink-0 ml-4">
+        <span id="fin-status-pill" class="px-2.5 py-1 rounded-full text-xs font-bold bg-slate-700 text-slate-300">—</span>
+        <svg class="chevron-icon w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+        </svg>
+      </div>
+    </button>
+    <div id="fin-detail" class="scorecard-detail border-t px-5 py-4" style="border-color:rgba(99,79,176,0.2)">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div>
+          <div class="flex items-center gap-4 mb-4">
+            <div id="cibil-ring" class="w-16 h-16 rounded-full flex items-center justify-center border-4 border-slate-600 flex-shrink-0">
+              <span id="cibil-score-num" class="text-xl font-bold text-slate-300">—</span>
+            </div>
+            <div>
+              <p class="text-xs text-slate-500 mb-0.5">CIBIL Score</p>
+              <p class="text-sm font-semibold" id="cibil-label">—</p>
+              <p class="text-xs mt-0.5" style="color:rgba(167,139,250,0.5)">TransUnion CIBIL V3</p>
+            </div>
+          </div>
+          <div class="mb-4">
+            <div class="flex justify-between text-xs text-slate-400 mb-1.5">
+              <span>Existing FOIR (Fixed Obligation to Income Ratio)</span>
+              <span id="foir-pct" class="font-semibold">—</span>
+            </div>
+            <div class="h-2.5 bg-slate-700 rounded-full overflow-hidden">
+              <div id="foir-bar" class="h-full rounded-full progress-bar" style="width:0%"></div>
+            </div>
+            <p class="text-xs text-slate-600 mt-1">RBI policy cap: 50% · Proposed FOIR shown in Key Concerns</p>
+          </div>
+        </div>
+        <dl class="grid grid-cols-2 gap-3 text-sm" id="fin-details"></dl>
+      </div>
+      <div id="fin-flags-block" class="mt-4 hidden">
+        <p class="text-xs text-amber-400 uppercase tracking-wider mb-2 font-semibold">Risk Flags</p>
+        <ul id="fin-flag-list" class="text-xs text-amber-300 space-y-1.5"></ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- Property Row -->
+  <div class="card rounded-2xl overflow-hidden shadow-lg">
+    <button class="scorecard-toggle w-full flex items-center justify-between px-5 py-4 hover:bg-white/5 transition-colors text-left" data-target="prop-detail">
+      <div class="flex items-center gap-4 min-w-0">
+        <div class="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style="background:rgba(245,158,11,0.15)">
+          <svg class="w-4 h-4 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+          </svg>
+        </div>
+        <div class="min-w-0">
+          <p class="text-xs text-slate-500 uppercase tracking-wider font-medium">Property</p>
+          <p class="text-sm text-slate-200 mt-0.5 truncate" id="prop-summary-text">—</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-3 flex-shrink-0 ml-4">
+        <span id="prop-status-pill" class="px-2.5 py-1 rounded-full text-xs font-bold bg-slate-700 text-slate-300">—</span>
+        <svg class="chevron-icon w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+        </svg>
+      </div>
+    </button>
+    <div id="prop-detail" class="scorecard-detail border-t px-5 py-4" style="border-color:rgba(99,79,176,0.2)">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div>
+          <div class="flex items-center gap-2 mb-4">
+            <span id="prop-title-icon" class="text-xl">—</span>
+            <span id="prop-title-label" class="text-sm font-semibold text-slate-300">Title Status</span>
+          </div>
+          <!-- LTV bar with dynamic RBI marker -->
+          <div class="mb-2">
+            <div class="flex justify-between text-xs text-slate-400 mb-1.5">
+              <span>LTV Ratio (Loan-to-Value)</span>
+              <span id="ltv-pct" class="font-semibold">—</span>
+            </div>
+            <div class="relative h-2.5 bg-slate-700 rounded-full overflow-visible">
+              <div id="ltv-bar" class="h-full rounded-full progress-bar" style="width:0%"></div>
+              <div id="ltv-marker" class="absolute top-[-3px] h-[calc(100%+6px)] w-0.5 bg-yellow-400/70" style="left:80%"></div>
+            </div>
+            <p class="text-xs text-slate-600 mt-1.5" id="ltv-cap-label">RBI cap: computing…</p>
+          </div>
+          <div id="ltv-status-note" class="mt-2 hidden text-xs px-3 py-2 rounded-lg" style="background:rgba(239,68,68,0.12);border:1px solid rgba(239,68,68,0.25);color:#FCA5A5">
+            LTV exceeds RBI cap. Cannot be approved by the underwriting manager alone — requires Credit Committee escalation.
+          </div>
+        </div>
+        <dl class="grid grid-cols-2 gap-3 text-sm" id="prop-details"></dl>
+      </div>
+      <div id="prop-flags-block" class="mt-4 hidden">
+        <p class="text-xs text-red-400 uppercase tracking-wider mb-2 font-semibold">Risk Flags</p>
+        <ul id="prop-flag-list" class="text-xs text-red-300 space-y-1.5"></ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- Documents Row -->
+  <div class="card rounded-2xl overflow-hidden shadow-lg">
+    <button class="scorecard-toggle w-full flex items-center justify-between px-5 py-4 hover:bg-white/5 transition-colors text-left" data-target="docs-detail">
+      <div class="flex items-center gap-4 min-w-0">
+        <div class="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style="background:rgba(139,92,246,0.2)">
+          <svg class="w-4 h-4 text-violet-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+          </svg>
+        </div>
+        <div class="min-w-0">
+          <p class="text-xs text-slate-500 uppercase tracking-wider font-medium">Documents</p>
+          <p class="text-sm text-slate-200 mt-0.5 truncate" id="docs-summary-text">—</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-3 flex-shrink-0 ml-4">
+        <span id="docs-status-pill" class="px-2.5 py-1 rounded-full text-xs font-bold bg-slate-700 text-slate-300">—</span>
+        <svg class="chevron-icon w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+        </svg>
+      </div>
+    </button>
+    <div id="docs-detail" class="scorecard-detail border-t" style="border-color:rgba(99,79,176,0.2)">
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead style="background:#0F0E24;color:#64748B" class="text-xs uppercase tracking-wider">
+            <tr>
+              <th class="px-5 py-3 text-left">Document</th>
+              <th class="px-5 py-3 text-left">Type</th>
+              <th class="px-5 py-3 text-center">Auth Status</th>
+              <th class="px-5 py-3 text-center">
+                <div class="tooltip-wrap inline-flex items-center gap-1 cursor-help">
+                  Confidence
+                  <svg class="w-3 h-3 text-slate-600" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+                  </svg>
+                  <span class="tooltip-box">AI authentication confidence — Claude analyses text legibility, stamp/seal authenticity, watermarks, and cross-field consistency within each document.</span>
+                </div>
+              </th>
+              <th class="px-5 py-3 text-left">Flags</th>
+            </tr>
+          </thead>
+          <tbody id="doc-table-body" class="divide-y" style="divide-color:rgba(99,79,176,0.15)"></tbody>
+        </table>
+      </div>
+      <div id="doc-missing-block" class="hidden px-6 py-3 border-t" style="background:rgba(185,28,28,0.15);border-color:rgba(185,28,28,0.3)">
+        <p class="text-xs" style="color:#FCA5A5">
+          <span class="font-semibold">Missing required: </span>
+          <span id="doc-missing-list"></span>
+        </p>
+      </div>
+      <!-- Consistency summary -->
+      <div class="px-5 py-4 border-t" style="border-color:rgba(99,79,176,0.2)">
+        <div class="flex items-center justify-between mb-3">
+          <p class="text-xs font-semibold uppercase tracking-wider text-slate-500">Cross-Document Consistency</p>
+          <span id="consistency-decision-pill" class="px-2.5 py-1 rounded-full text-xs font-bold uppercase bg-slate-700 text-slate-300">—</span>
+        </div>
+        <div class="mb-3">
+          <div class="flex justify-between text-xs text-slate-400 mb-1.5">
+            <span>Consistency Score</span>
+            <span id="consistency-score-pct" class="font-semibold">—</span>
+          </div>
+          <div class="h-2 bg-slate-700 rounded-full overflow-hidden">
+            <div id="consistency-bar" class="h-full rounded-full progress-bar" style="width:0%"></div>
+          </div>
+        </div>
+        <ul id="discrepancy-list" class="space-y-2.5"></ul>
+      </div>
+      <!-- Data sources note -->
+      <div class="px-5 py-3 border-t" style="border-color:rgba(99,79,176,0.15);background:#0a0918">
+        <p class="text-xs text-slate-600">
+          <span class="font-semibold text-slate-500">Data sources:</span>
+          KYC: UIDAI Aadhaar API + NSDL PAN · Credit: TransUnion CIBIL V3 · Bank statements: RBI Account Aggregator framework · Property: State Sub-Registrar records + empanelled valuers
+        </p>
+      </div>
+    </div>
+  </div>
+
+</section>
+
+<!-- ═════════════════════════════ KEY POSITIVES + CONCERNS (WITH ACTIONS) ═══ -->
+<section class="max-w-screen-xl mx-auto px-6 mt-5 grid grid-cols-1 md:grid-cols-2 gap-5">
+  <div class="card rounded-2xl p-6 shadow-xl" style="border-color:rgba(34,197,94,0.2)">
+    <h3 class="text-xs font-semibold uppercase tracking-wider text-green-500 mb-4 flex items-center gap-2">
+      <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+      </svg>
+      Key Positives
+    </h3>
+    <ul id="positives-list" class="space-y-3"></ul>
+  </div>
+  <div class="card rounded-2xl p-6 shadow-xl" style="border-color:rgba(239,68,68,0.2)">
+    <h3 class="text-xs font-semibold uppercase tracking-wider text-red-400 mb-3 flex items-center gap-2">
+      <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+        <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+      </svg>
+      Key Concerns &amp; Required Actions
+    </h3>
+    <p class="text-xs mb-3" style="color:#475569">Each concern is tagged with the action needed to resolve it.</p>
+    <ul id="concerns-list" class="space-y-3"></ul>
+  </div>
+</section>
+
+<!-- ═══════════════════ CHANGE 1: SPLIT CONDITIONS ═══ -->
+<section class="max-w-screen-xl mx-auto px-6 mt-5 grid grid-cols-1 md:grid-cols-2 gap-5">
+
+  <!-- Category A: Sanction Conditions (blocks approval) -->
+  <div class="card rounded-2xl p-6 shadow-xl" style="border-color:rgba(239,68,68,0.25)">
+    <div class="flex items-center gap-2 mb-1">
+      <h3 class="text-xs font-semibold uppercase tracking-wider text-red-400 flex items-center gap-2">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+        </svg>
+        Sanction Conditions
+      </h3>
+      <span class="text-xs px-2 py-0.5 rounded-full" style="background:rgba(239,68,68,0.15);color:#FCA5A5">Blocks Approval</span>
+    </div>
+    <p class="text-xs mb-4" style="color:#475569">Must be resolved before the Approve button is enabled.</p>
+    <ol id="sanction-conditions-list" class="space-y-3"></ol>
+  </div>
+
+  <!-- Category B: Pre-Disbursement (Ops checklist) -->
+  <div class="card rounded-2xl p-6 shadow-xl" style="border-color:rgba(99,102,241,0.2)">
+    <div class="flex items-center gap-2 mb-1">
+      <h3 class="text-xs font-semibold uppercase tracking-wider text-indigo-400 flex items-center gap-2">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
+        </svg>
+        Pre-Disbursement (Ops Checklist)
+      </h3>
+      <span class="text-xs px-2 py-0.5 rounded-full" style="background:rgba(99,102,241,0.12);color:#A5B4FC">Does Not Block Approval</span>
+    </div>
+    <p class="text-xs mb-4" style="color:#475569">Forwarded to Ops team. Underwriter acknowledges — does not action.</p>
+    <ol id="predisbursement-list" class="space-y-3"></ol>
+  </div>
+
+</section>
+
+<!-- ═══════════════════════════════════════════════ NEXT STEPS FLOWCHART ═══ -->
+<section id="next-steps-section" class="max-w-screen-xl mx-auto px-6 mt-5 hidden">
+  <div class="card rounded-2xl overflow-hidden shadow-xl" style="border-color:rgba(99,79,176,0.25)">
+    <div class="px-5 py-4 border-b" style="background:#0F0E24;border-color:rgba(99,79,176,0.2)">
+      <p class="text-sm font-semibold text-slate-200">Next Steps — Case Resolution Path</p>
+      <p class="text-xs mt-0.5" style="color:rgba(167,139,250,0.6)">What needs to happen before this case can be closed</p>
+    </div>
+    <div class="px-5 py-5 overflow-x-auto" id="flowchart-container"></div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════ AGENT 7: CUSTOMER COMMUNICATIONS ═══ -->
+<section id="comms-section" class="max-w-screen-xl mx-auto px-6 mt-5 hidden">
+  <div class="card rounded-2xl overflow-hidden shadow-xl" style="border-color:rgba(99,102,241,0.25)">
+    <div class="px-5 py-4 flex items-center justify-between border-b" style="background:#0F0E24;border-color:rgba(99,79,176,0.2)">
+      <div class="flex items-center gap-3">
+        <div class="w-7 h-7 rounded-lg flex items-center justify-center" style="background:rgba(99,102,241,0.2)">
+          <svg class="w-4 h-4 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+          </svg>
+        </div>
+        <div>
+          <p class="text-sm font-semibold text-slate-200">Customer Communication Log</p>
+          <p class="text-xs" style="color:rgba(167,139,250,0.6)">Agent 7 — CustomerComms</p>
+        </div>
+      </div>
+      <button id="draft-comms-btn"
+              onclick="draftCommunication()"
+              class="px-4 py-2 rounded-xl text-xs font-bold text-white transition-all"
+              style="background:#1D4ED8;border:1px solid rgba(59,130,246,0.4)">
+        Request Information
+      </button>
+    </div>
+    <div id="comms-list" class="divide-y" style="divide-color:rgba(99,79,176,0.1)"></div>
+    <p id="comms-empty" class="hidden px-5 py-4 text-xs italic" style="color:#475569">
+      No communications sent yet. Click "Request Information" to generate and send a customer notification.
+    </p>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════ CC ESCALATION AUDIT LOG ═══ -->
+<section id="escalation-audit-section" class="max-w-screen-xl mx-auto px-6 mt-5 hidden">
+  <div class="card rounded-2xl overflow-hidden shadow-xl" style="border-color:rgba(245,158,11,0.25)">
+    <div class="px-5 py-4 border-b" style="background:#0F0E24;border-color:rgba(245,158,11,0.2)">
+      <div class="flex items-center gap-2">
+        <span class="text-amber-400 text-sm">⚖</span>
+        <p class="text-sm font-semibold text-slate-200">Credit Committee Escalation — Audit Record</p>
+      </div>
+      <p class="text-xs mt-0.5" style="color:rgba(245,158,11,0.5)">Compliance log — recorded at time of escalation</p>
+    </div>
+    <div class="px-5 py-4" id="escalation-audit-body"></div>
+  </div>
+</section>
+
+<!-- Back to queue CTA (bottom of content) -->
+<div class="max-w-screen-xl mx-auto px-6 mt-6 mb-2 flex justify-end">
+  <a href="/" class="flex items-center gap-2 text-sm font-medium transition-colors hover:text-violet-300"
+     style="color:rgba(167,139,250,0.7)">
+    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+    </svg>
+    Back to Application Queue
+  </a>
+</div>
+
+<!-- ═══════════════════════════════ INITIAL DECISION PANEL ═══ -->
+<div id="decision-panel" class="hidden fixed bottom-0 left-0 right-0 z-50 panel-bg shadow-2xl backdrop-blur">
+  <div class="max-w-screen-xl mx-auto px-6 py-4">
+    <div class="flex items-center justify-between mb-3">
+      <div class="flex items-center gap-2">
+        <div class="w-2 h-2 rounded-full animate-pulse" style="background:#F97316"></div>
+        <h3 class="text-sm font-semibold text-slate-200 uppercase tracking-wider">Manager Decision</h3>
+      </div>
+      <span class="text-xs text-slate-600" id="decision-app-ref">—</span>
+    </div>
+    <div class="flex flex-wrap items-end gap-3">
+      <div class="flex gap-2 flex-wrap" id="cta-buttons">
+        <button data-decision="approve"
+                class="cta-btn px-4 py-2.5 rounded-xl text-sm font-semibold text-white transition-all"
+                style="background:#166534;border:1px solid rgba(34,197,94,0.3)">
+          Approve
+        </button>
+        <button data-decision="request_info"
+                class="cta-btn px-4 py-2.5 rounded-xl text-sm font-semibold text-white transition-all"
+                style="background:#1e3a8a;border:1px solid rgba(59,130,246,0.4)">
+          Request Information
+        </button>
+        <button data-decision="reject"
+                class="cta-btn px-4 py-2.5 rounded-xl text-sm font-semibold text-white transition-all"
+                style="background:#7f1d1d;border:1px solid rgba(239,68,68,0.4)">
+          Reject
+        </button>
+      </div>
+      <textarea id="decision-notes" rows="1"
+                placeholder="Manager notes (optional)…"
+                class="flex-1 min-w-48 border rounded-xl px-4 py-2.5 text-sm text-slate-200 placeholder-slate-600 focus:outline-none resize-none"
+                style="background:#1a1838;border-color:rgba(99,79,176,0.4)"></textarea>
+      <button id="submit-btn" disabled
+              class="px-5 py-2.5 rounded-xl text-sm font-bold bg-slate-700 text-slate-500 cursor-not-allowed transition-all">
+        Submit Decision
+      </button>
+    </div>
+    <p class="mt-2 text-xs text-slate-600 h-4" id="selected-decision-label"></p>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════ FOLLOW-UP ACTION PANEL ═══ -->
+<div id="followup-panel" class="hidden fixed bottom-0 left-0 right-0 z-50 panel-bg shadow-2xl backdrop-blur">
+  <div class="max-w-screen-xl mx-auto px-6 py-4">
+    <div class="flex items-center justify-between mb-3">
+      <div class="flex items-center gap-2">
+        <div class="w-2 h-2 rounded-full animate-pulse" style="background:#818CF8"></div>
+        <h3 class="text-sm font-semibold text-slate-200 uppercase tracking-wider" id="followup-title">Follow-up Action</h3>
+      </div>
+      <span class="text-xs text-slate-500" id="followup-app-ref">—</span>
+    </div>
+    <p class="text-xs text-slate-400 mb-3" id="followup-instruction">—</p>
+    <div class="flex flex-wrap items-end gap-3">
+      <div class="flex gap-2 flex-wrap" id="followup-buttons"></div>
+      <textarea id="followup-notes" rows="1"
+                placeholder="Notes (optional)…"
+                class="flex-1 min-w-48 border rounded-xl px-4 py-2.5 text-sm text-slate-200 placeholder-slate-600 focus:outline-none resize-none"
+                style="background:#1a1838;border-color:rgba(99,79,176,0.4)"></textarea>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════ CONFIRMED STATE BANNER ═══ -->
+<div id="decision-confirmed" class="hidden fixed bottom-0 left-0 right-0 z-50 panel-bg shadow-2xl backdrop-blur">
+  <div class="max-w-screen-xl mx-auto px-6 py-5 flex items-center gap-5">
+    <div id="confirmed-icon" class="w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0 text-2xl font-bold"
+         style="background:rgba(22,101,52,0.5);color:#86EFAC">✓</div>
+    <div class="flex-1">
+      <p class="text-slate-100 font-semibold" id="confirmed-msg">Decision recorded.</p>
+      <p class="text-slate-400 text-xs mt-0.5" id="confirmed-detail">—</p>
+    </div>
+    <a href="/" class="px-4 py-2 rounded-xl text-xs font-semibold transition-colors flex-shrink-0"
+       style="background:#1a1838;border:1px solid rgba(99,79,176,0.4);color:#A78BFA">
+      ← Application Queue
+    </a>
+  </div>
+</div>
+
+<!-- SCRIPTS -->
+<script>
+"use strict";
+
+let appData          = null;
+let selectedDecision = null;
+let currentAppId     = null;
+
+// ── Colour maps ──────────────────────────────────────────────────────────────────
+const RISK_BORDER = {
+  low: "border-l-green-500", medium: "border-l-amber-500",
+  high: "border-l-red-500",  critical: "border-l-red-950",
+};
+const RISK_BADGE_STYLE = {
+  low:      "background:rgba(34,197,94,0.15);color:#86EFAC;border:1px solid rgba(34,197,94,0.3)",
+  medium:   "background:rgba(245,158,11,0.15);color:#FCD34D;border:1px solid rgba(245,158,11,0.3)",
+  high:     "background:rgba(239,68,68,0.15);color:#FCA5A5;border:1px solid rgba(239,68,68,0.3)",
+  critical: "background:rgba(185,28,28,0.2);color:#FCA5A5;border:1px solid rgba(185,28,28,0.4)",
+};
+const REC_BADGE = {
+  approve:                 "background:rgba(22,101,52,0.4);color:#86EFAC",
+  approve_with_conditions: "background:rgba(30,58,138,0.4);color:#A5B4FC",
+  conditional_approve:     "background:rgba(30,58,138,0.4);color:#A5B4FC",
+  refer:                   "background:rgba(120,53,15,0.4);color:#FCD34D",
+  reject:                  "background:rgba(127,29,29,0.4);color:#FCA5A5",
+};
+const STATUS_BADGE_CLS = {
+  pending_manager_decision:   "background:rgba(120,53,15,0.4);color:#FCD34D",
+  approved:                   "background:rgba(22,101,52,0.4);color:#86EFAC",
+  rejected:                   "background:rgba(127,29,29,0.4);color:#FCA5A5",
+  customer_followup_required: "background:rgba(154,52,18,0.4);color:#FDBA74",
+  conditions_pending:         "background:rgba(30,58,138,0.4);color:#A5B4FC",
+  committee_review:           "background:rgba(88,28,135,0.4);color:#C4B5FD",
+};
+const AUTH_STYLE = {
+  genuine:      "background:rgba(34,197,94,0.15);color:#86EFAC;border:1px solid rgba(34,197,94,0.25)",
+  inconclusive: "background:rgba(245,158,11,0.15);color:#FCD34D;border:1px solid rgba(245,158,11,0.25)",
+  suspect:      "background:rgba(239,68,68,0.15);color:#FCA5A5;border:1px solid rgba(239,68,68,0.3)",
+  rejected:     "background:rgba(185,28,28,0.2);color:#FCA5A5;border:1px solid rgba(185,28,28,0.4)",
+};
+const SEV_STYLE = {
+  critical: "background:rgba(185,28,28,0.2);color:#FCA5A5",
+  high:     "background:rgba(239,68,68,0.15);color:#FCA5A5",
+  medium:   "background:rgba(245,158,11,0.15);color:#FCD34D",
+  low:      "background:#1e293b;color:#94A3B8",
+};
+
+// ── Utilities ─────────────────────────────────────────────────────────────────
+function formatINR(n) {
+  if (n == null) return "—";
+  if (n >= 10_000_000) return "₹" + (n / 10_000_000).toFixed(2) + " Cr";
+  if (n >= 100_000)    return "₹" + (n / 100_000).toFixed(1) + "L";
+  return "₹" + n.toLocaleString("en-IN");
+}
+function formatDateTime(iso) {
+  if (!iso) return "—";
+  try {
+    return new Date(iso).toLocaleString("en-IN", {
+      day:"2-digit", month:"short", year:"numeric", hour:"2-digit", minute:"2-digit",
+    });
+  } catch { return iso; }
+}
+function tickCross(val) {
+  return val
+    ? '<span style="color:#86EFAC;font-weight:700;font-size:1rem">✓</span>'
+    : '<span style="color:#FCA5A5;font-weight:700;font-size:1rem">✗</span>';
+}
+function humanise(s) {
+  if (!s) return "—";
+  return s.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+}
+function stBadge(st) {
+  const style = STATUS_BADGE_CLS[st] || "background:#334155;color:#CBD5E1";
+  return `px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wide" style="${style}"`;
+}
+function verifyStatusStyle(st) {
+  const m = {
+    verified:           "background:rgba(34,197,94,0.15);color:#86EFAC",
+    partially_verified: "background:rgba(245,158,11,0.12);color:#FCD34D",
+    failed:             "background:rgba(239,68,68,0.15);color:#FCA5A5",
+    pending:            "background:rgba(100,116,139,0.2);color:#94A3B8",
+  };
+  return "px-2.5 py-1 rounded-full text-xs font-bold\" style=\"" + (m[(st||"pending").toLowerCase()] || m.pending);
+}
+
+// ── Deadline helpers ──────────────────────────────────────────────────────────
+function calcDeadlineInfo(data) {
+  if (data._deadline_info && typeof data._deadline_info === "object") return data._deadline_info;
+  if (!data.action_deadline) return null;
+  try {
+    const deadline = new Date(data.action_deadline);
+    const diffMs = deadline - new Date();
+    return {
+      deadline: data.action_deadline,
+      days_remaining: Math.floor(diffMs / 86400000),
+      hours_remaining: Math.floor(diffMs / 3600000),
+      is_overdue: diffMs < 0,
+      action_type: data.action_type || "",
+    };
+  } catch { return null; }
+}
+
+// ── Action Required Banner ─────────────────────────────────────────────────────
+function renderActionBanner(d) {
+  const status = d.status || "";
+  const dl = calcDeadlineInfo(d);
+  const banner = document.getElementById("action-banner");
+  const inner  = document.getElementById("action-banner-inner");
+
+  if (!["customer_followup_required","conditions_pending","committee_review"].includes(status)) return;
+  banner.classList.remove("hidden");
+
+  const notifiedAt = d.action_issued_at ? " · CustomerComms agent notified customer on " + formatDateTime(d.action_issued_at) + ". Awaiting their response." : "";
+  const detailMap = {
+    customer_followup_required: "Customer was notified via SMS + email to submit additional documents." + notifiedAt,
+    conditions_pending:         "Conditional approval issued. Verify all conditions before final disbursement.",
+    committee_review:           "Case escalated to Credit Committee. Record their decision below.",
+  };
+  const titleMap = {
+    customer_followup_required: "Awaiting Customer Documents",
+    conditions_pending:         "Awaiting Condition Verification",
+    committee_review:           "Awaiting Credit Committee Decision",
+  };
+
+  document.getElementById("action-banner-title").textContent  = titleMap[status] || "Action Required";
+  document.getElementById("action-banner-detail").textContent = detailMap[status] || "";
+
+  if (dl) {
+    if (dl.is_overdue) {
+      inner.style.cssText = "background:rgba(185,28,28,0.2);border-bottom:1px solid rgba(239,68,68,0.35);padding:12px 24px";
+      document.getElementById("action-banner-icon").textContent = "🔴";
+      const cd = document.getElementById("action-banner-countdown");
+      cd.style.cssText = "font-family:monospace;font-weight:700;font-size:0.875rem;padding:6px 12px;border-radius:8px;background:rgba(185,28,28,0.4);color:#FCA5A5;flex-shrink:0";
+      cd.textContent = "OVERDUE — " + Math.abs(dl.days_remaining) + " day(s) past deadline";
+    } else {
+      const urgent = dl.days_remaining <= 3;
+      inner.style.cssText = `background:${urgent?"rgba(154,52,18,0.2)":"rgba(120,53,15,0.15)"};border-bottom:1px solid ${urgent?"rgba(249,115,22,0.35)":"rgba(245,158,11,0.3)"};padding:12px 24px`;
+      document.getElementById("action-banner-icon").textContent = urgent ? "🟠" : "⏰";
+      const cd = document.getElementById("action-banner-countdown");
+      cd.style.cssText = `font-family:monospace;font-weight:700;font-size:0.875rem;padding:6px 12px;border-radius:8px;background:${urgent?"rgba(154,52,18,0.4)":"rgba(120,53,15,0.3)"};color:${urgent?"#FDBA74":"#FCD34D"};flex-shrink:0`;
+      cd.textContent = dl.days_remaining + " day(s) remaining";
+    }
+  } else {
+    inner.style.cssText = "background:rgba(120,53,15,0.15);border-bottom:1px solid rgba(245,158,11,0.3);padding:12px 24px";
+    document.getElementById("action-banner-countdown").textContent = "Deadline set";
+  }
+}
+
+// ── Section renderers ──────────────────────────────────────────────────────────
+function renderHeader(d) {
+  document.getElementById("hdr-app-id").textContent = d.application_id || "—";
+  document.getElementById("hdr-timestamp").textContent = "Updated: " + formatDateTime(d.updated_at);
+  const st = (d.status || "").toLowerCase();
+  const badge = document.getElementById("hdr-status-badge");
+  badge.textContent = humanise(d.status);
+  const bstyle = STATUS_BADGE_CLS[st] || "background:#334155;color:#CBD5E1";
+  badge.setAttribute("style", "padding:4px 12px;border-radius:9999px;font-size:0.75rem;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;" + bstyle);
+}
+
+function renderBorrowerStrip(d) {
+  const ap = d.applicant || {}, ln = d.loan || {};
+  const rate = d._indicative_rate;
+  const fields = [
+    ["Applicant",     ap.full_name],
+    ["Date of Birth", ap.date_of_birth],
+    ["Employer",      ap.employer_name || ap.employment_type],
+    ["Loan Requested",formatINR(ln.loan_amount_requested)],
+    ["Property Value",formatINR(ln.property_value)],
+    ["Tenure",        ln.loan_tenure_years ? ln.loan_tenure_years + " yrs" : "—"],
+    ["Purpose",       humanise(ln.loan_purpose)],
+    ["Indicative Rate", rate || "—"],
+  ];
+  document.getElementById("borrower-strip").innerHTML = fields.map(([label, val]) => `
+    <div>
+      <p class="text-xs uppercase tracking-wider mb-0.5 font-medium" style="color:rgba(167,139,250,0.5)">${label}</p>
+      <p class="text-sm font-semibold text-slate-200 truncate" title="${val||''}">${val||"—"}</p>
+    </div>`).join("");
+}
+
+function renderRecommendationBanner(d) {
+  const db   = d.underwriter_dashboard || {};
+  const risk = (db.overall_risk_level || "medium").toLowerCase();
+  const rec  = (db.recommendation || "refer").toLowerCase().replace(/ /g, "_");
+  const banner = document.getElementById("rec-banner");
+  Object.values(RISK_BORDER).forEach(c => banner.classList.remove(c));
+  banner.classList.add(RISK_BORDER[risk] || RISK_BORDER.medium);
+
+  const rb = document.getElementById("rec-risk-badge");
+  rb.textContent = risk.toUpperCase() + " RISK";
+  rb.setAttribute("style", "padding:8px 16px;border-radius:12px;font-weight:700;font-size:0.875rem;text-transform:uppercase;letter-spacing:0.1em;" + (RISK_BADGE_STYLE[risk] || RISK_BADGE_STYLE.medium));
+
+  const recb = document.getElementById("rec-rec-badge");
+  recb.textContent = humanise(rec);
+  recb.setAttribute("style", "padding:8px 16px;border-radius:12px;font-weight:700;font-size:0.875rem;text-transform:uppercase;letter-spacing:0.1em;" + (REC_BADGE[rec] || REC_BADGE.refer));
+
+  document.getElementById("rec-summary").textContent = db.executive_summary || "—";
+  document.getElementById("rec-generated-at").textContent = "Generated: " + formatDateTime(db.generated_at);
+}
+
+function renderKYC(d) {
+  const kyc = d.kyc_result || {};
+
+  const checks = [
+    ["Aadhaar Verified",    kyc.aadhaar_verified],
+    ["PAN Verified",        kyc.pan_verified],
+    ["Name Match (Aadhaar)",kyc.name_match_aadhaar],
+    ["Name Match (PAN)",    kyc.name_match_pan],
+    ["DOB Match",           kyc.dob_match],
+    ["Address Match",       kyc.address_match],
+    ["PAN–Aadhaar Linked",  kyc.pan_aadhaar_linked],
+  ];
+  const passing = checks.filter(([,v]) => v).length;
+  const failing = checks.filter(([,v]) => !v);
+
+  // Derive status from actual checks, not just the agent's status field
+  let derivedStatus, derivedLabel;
+  if (passing === checks.length) {
+    derivedStatus = "verified";
+    derivedLabel  = "All Checks Passed";
+  } else if (failing.length === 1 && failing[0][0] === "Address Match") {
+    derivedStatus = "partially_verified";
+    derivedLabel  = "Verified — Address Mismatch";
+  } else if (passing >= 5) {
+    derivedStatus = "partially_verified";
+    derivedLabel  = `${passing}/${checks.length} Checks Passed`;
+  } else {
+    derivedStatus = "failed";
+    derivedLabel  = `${passing}/${checks.length} Checks Passed`;
+  }
+
+  const pill = document.getElementById("kyc-status-pill");
+  pill.textContent = derivedLabel;
+  pill.setAttribute("style", verifyStatusStyle(derivedStatus).split('"').pop().split('"')[0] || "");
+
+  document.getElementById("kyc-checklist").innerHTML = checks.map(([label, val]) =>
+    `<li class="flex items-center gap-2.5 text-slate-300">${tickCross(val)}
+     <span class="text-xs ${val ? "" : "text-slate-500"}">${label}${!val ? ' <span style="color:#F59E0B;font-size:10px">⚠ flagged</span>' : ""}</span></li>`).join("");
+
+  document.getElementById("kyc-summary-text").textContent =
+    `${passing}/${checks.length} checks passed` +
+    (kyc.pan_aadhaar_linked ? " · PAN-Aadhaar linked" : " · PAN-Aadhaar NOT linked") +
+    (kyc.address_match === false ? " · Address mismatch flagged" : "");
+
+  // PAN in detail (not as row identifier)
+  const pan = (d.applicant || {}).pan_number;
+  if (pan) {
+    document.getElementById("kyc-pan-block").classList.remove("hidden");
+    document.getElementById("kyc-pan-value").textContent = pan;
+  }
+
+  const flags = kyc.risk_flags || [];
+  if (flags.length) {
+    document.getElementById("kyc-flags-block").classList.remove("hidden");
+    document.getElementById("kyc-flag-list").innerHTML =
+      flags.map(f => `<li class="flex items-start gap-1.5"><span style="color:#EF4444" class="mt-0.5">▶</span>${f}</li>`).join("");
+  }
+}
+
+// Financial check is an assessment (policy compliance), not identity verification
+const FIN_STATUS_LABEL = {
+  verified:           "Policy Compliant",
+  partially_verified: "Policy Flags Raised",
+  failed:             "Unable to Assess",
+  pending:            "Pending Assessment",
+};
+
+function renderFinancials(d) {
+  const fin = d.financial_result || {};
+  const st  = (fin.status || "pending").toLowerCase();
+  const pill = document.getElementById("fin-status-pill");
+  pill.textContent = FIN_STATUS_LABEL[st] || humanise(fin.status);
+  pill.setAttribute("style", verifyStatusStyle(st).split('"').pop().split('"')[0] || "");
+
+  const score = fin.cibil_score;
+  document.getElementById("cibil-score-num").textContent = score ?? "—";
+  let cRingStyle = "border-color:#475569;color:#94A3B8", cibilLabel = "—", cibilLabelColor = "#94A3B8";
+  if (score >= 750) { cRingStyle="border-color:#22C55E;color:#86EFAC"; cibilLabel="Excellent"; cibilLabelColor="#86EFAC"; }
+  else if (score >= 700) { cRingStyle="border-color:#10B981;color:#6EE7B7"; cibilLabel="Good"; cibilLabelColor="#6EE7B7"; }
+  else if (score >= 650) { cRingStyle="border-color:#F59E0B;color:#FCD34D"; cibilLabel="Fair"; cibilLabelColor="#FCD34D"; }
+  else if (score)        { cRingStyle="border-color:#EF4444;color:#FCA5A5"; cibilLabel="Poor"; cibilLabelColor="#FCA5A5"; }
+  const ring = document.getElementById("cibil-ring");
+  ring.setAttribute("style", `width:64px;height:64px;border-radius:9999px;display:flex;align-items:center;justify-content:center;border-width:4px;flex-shrink:0;${cRingStyle}`);
+  const lbl = document.getElementById("cibil-label");
+  lbl.textContent = cibilLabel;
+  lbl.setAttribute("style", `font-weight:600;font-size:0.875rem;color:${cibilLabelColor}`);
+
+  const foir = fin.foir || 0, foirPct = Math.round(foir * 100);
+  document.getElementById("foir-pct").textContent = foirPct + "%";
+  const foirBar = document.getElementById("foir-bar");
+  foirBar.style.width = Math.min(foirPct, 100) + "%";
+  foirBar.style.background = foir < 0.40 ? "#22C55E" : foir <= 0.50 ? "#F59E0B" : "#EF4444";
+
+  document.getElementById("fin-details").innerHTML = [
+    ["Net Income/Mo",   formatINR(fin.monthly_net_income)],
+    ["Gross Income/Mo", formatINR(fin.monthly_gross_income)],
+    ["Existing EMI",    formatINR(fin.existing_emi_obligations)],
+    ["Eligible Amount", formatINR(fin.eligible_loan_amount)],
+    ["Avg Bank Balance",formatINR(fin.average_bank_balance)],
+    ["AA Verified",     fin.account_aggregator_verified ? "Yes" : "No"],
+  ].map(([k,v]) => `<div><dt class="text-xs mb-0.5" style="color:#475569">${k}</dt>
+    <dd class="text-xs font-semibold text-slate-300">${v}</dd></div>`).join("");
+
+  document.getElementById("fin-summary-text").textContent =
+    `CIBIL ${score ?? "—"} (${cibilLabel}) · FOIR ${foirPct}% · Eligible ${formatINR(fin.eligible_loan_amount)}`;
+
+  const flags = fin.risk_flags || [];
+  if (flags.length) {
+    document.getElementById("fin-flags-block").classList.remove("hidden");
+    document.getElementById("fin-flag-list").innerHTML =
+      flags.map(f => `<li class="flex items-start gap-1.5"><span style="color:#F59E0B" class="mt-0.5">▶</span>${humanise(f)}</li>`).join("");
+  }
+}
+
+function renderProperty(d) {
+  const prop = d.property_result || {};
+  const loan = d.loan || {};
+  const st   = (prop.status || "pending").toLowerCase();
+  const pill = document.getElementById("prop-status-pill");
+  pill.textContent = humanise(prop.status);
+  pill.setAttribute("style", verifyStatusStyle(st).split('"').pop().split('"')[0] || "");
+
+  document.getElementById("prop-title-icon").textContent  = prop.title_clear ? "✅" : "❌";
+  const tlabel = document.getElementById("prop-title-label");
+  tlabel.textContent = prop.title_clear ? "Title Clear" : "Title Not Clear";
+  tlabel.setAttribute("style", `font-size:0.875rem;font-weight:600;color:${prop.title_clear?"#86EFAC":"#FCA5A5"}`);
+
+  const ltv = prop.ltv_ratio || 0;
+  const ltvPct     = Math.round(ltv * 100);                      // for bar width (integer)
+  const ltvDisplay = parseFloat((ltv * 100).toFixed(1));         // for text labels (one decimal)
+  document.getElementById("ltv-pct").textContent = ltvDisplay + "%";
+  const ltvBar = document.getElementById("ltv-bar");
+  ltvBar.style.width = Math.min(ltvPct, 100) + "%";
+
+  // Dynamic RBI LTV cap marker
+  const loanAmt = loan.loan_amount_requested || 0;
+  const rbiCap  = d._rbi_ltv_cap || 0.80;
+  const rbiPct  = Math.round(rbiCap * 100);
+  const ltvBreached = ltv > rbiCap;
+
+  ltvBar.style.background = ltvBreached ? "#EF4444" : ltv > (rbiCap - 0.05) ? "#F59E0B" : "#22C55E";
+
+  const marker = document.getElementById("ltv-marker");
+  marker.style.left = rbiPct + "%";
+
+  let loanBand = loanAmt <= 3_000_000 ? "≤₹30L" : loanAmt <= 7_500_000 ? "₹30–75L" : ">₹75L";
+  document.getElementById("ltv-cap-label").innerHTML =
+    `RBI cap for ${loanBand} loans: <strong style="color:#FBBF24">${rbiPct}%</strong>` +
+    (ltvBreached
+      ? ` · <strong style="color:#FCA5A5">LTV ${ltvDisplay}% exceeds cap</strong>`
+      : ` · <span style="color:#86EFAC">LTV ${ltvDisplay}% is within limit ✓</span>`);
+
+  if (ltvBreached) {
+    document.getElementById("ltv-status-note").classList.remove("hidden");
+  }
+
+  document.getElementById("prop-details").innerHTML = [
+    ["Market Value",   formatINR(prop.market_value)],
+    ["Distress Value", formatINR(prop.distress_value)],
+    ["Property Age",   prop.property_age_years != null ? prop.property_age_years + " yrs" : "—"],
+    ["Encumb. Clear",  prop.encumbrance_clear ? "Yes" : (prop.encumbrance_clear === false ? "No" : "—")],
+    ["Registry Verif.",prop.registry_verified ? "Yes" : "—"],
+    ["Approved Plan",  prop.approved_plan_available ? "Available" : "—"],
+  ].map(([k,v]) => `<div><dt class="text-xs mb-0.5" style="color:#475569">${k}</dt>
+    <dd class="text-xs font-semibold text-slate-300">${v}</dd></div>`).join("");
+
+  document.getElementById("prop-summary-text").textContent =
+    `${prop.title_clear ? "Title Clear" : "Title NOT Clear"} · LTV ${ltvDisplay}% (cap ${rbiPct}%) · Market ${formatINR(prop.market_value)}`;
+
+  const flags = prop.risk_flags || [];
+  if (flags.length) {
+    document.getElementById("prop-flags-block").classList.remove("hidden");
+    document.getElementById("prop-flag-list").innerHTML =
+      flags.map(f => `<li class="flex items-start gap-1.5"><span style="color:#EF4444" class="mt-0.5">▶</span>${f}</li>`).join("");
+  }
+}
+
+function renderDocuments(d) {
+  const docs    = d.authentication_results || [];
+  const missing = (d.document_catalogue?.missing_required) || [];
+  const cr      = d.consistency_report || {};
+
+  const genuineCount = docs.filter(doc => doc.auth_status === "genuine").length;
+  const suspectCount = docs.filter(doc => ["suspect","rejected"].includes(doc.auth_status)).length;
+  const consistPct   = Math.round((cr.consistency_score || 0) * 100);
+  const disc         = cr.discrepancies || [];
+
+  document.getElementById("docs-summary-text").textContent =
+    `${docs.length} docs · ${missing.length} missing · Consistency ${consistPct}%` +
+    (suspectCount > 0 ? ` · ${suspectCount} suspect/rejected` : "");
+
+  const allGenuine  = genuineCount === docs.length && docs.length > 0;
+  const hasFraud    = suspectCount > 0;
+  const hasMissing  = missing.length > 0;
+  // Determine pill: missing docs always surface as Incomplete regardless of uploaded doc quality
+  let docSt, dpillText;
+  if (hasFraud) {
+    docSt = "suspect"; dpillText = `Fraud Flags`;
+  } else if (hasMissing) {
+    docSt = "partial"; dpillText = `${docs.length} Genuine · ${missing.length} Missing`;
+  } else if (allGenuine) {
+    docSt = "genuine"; dpillText = "All Genuine";
+  } else {
+    docSt = "partial"; dpillText = "Partial";
+  }
+  const pillStyles = {
+    genuine: "background:rgba(34,197,94,0.15);color:#86EFAC",
+    partial: "background:rgba(245,158,11,0.12);color:#FCD34D",
+    suspect: "background:rgba(239,68,68,0.15);color:#FCA5A5",
+  };
+  const dpill = document.getElementById("docs-status-pill");
+  dpill.textContent = dpillText;
+  dpill.setAttribute("style", "padding:4px 10px;border-radius:9999px;font-size:0.75rem;font-weight:700;" + (pillStyles[docSt] || pillStyles.partial));
+
+  document.getElementById("doc-table-body").innerHTML = docs.map(doc => {
+    const astyle = AUTH_STYLE[doc.auth_status] || "background:#1e293b;color:#94A3B8";
+    const conf   = doc.auth_confidence != null ? Math.round(doc.auth_confidence * 100) + "%" : "—";
+    const flags  = (doc.auth_flags || []).slice(0, 2)
+      .map(f => `<span class="block" style="color:#64748B;line-height:1.3">${f.substring(0,80)}${f.length>80?"…":""}</span>`)
+      .join("");
+    return `<tr style="border-bottom:1px solid rgba(99,79,176,0.1)" class="hover:bg-white/[0.02] transition-colors">
+      <td class="px-5 py-3 text-slate-400 font-mono text-xs">${doc.filename}</td>
+      <td class="px-5 py-3 text-slate-400 text-xs">${humanise(doc.doc_type)}</td>
+      <td class="px-5 py-3 text-center">
+        <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold" style="${astyle}">${humanise(doc.auth_status)}</span>
+      </td>
+      <td class="px-5 py-3 text-center text-slate-400 text-xs font-mono">${conf}</td>
+      <td class="px-5 py-3 text-xs">${flags || '<span style="color:#1e293b">—</span>'}</td>
+    </tr>`;
+  }).join("");
+
+  if (missing.length) {
+    document.getElementById("doc-missing-block").classList.remove("hidden");
+    document.getElementById("doc-missing-list").textContent = missing.join(" · ");
+  }
+
+  document.getElementById("consistency-score-pct").textContent = consistPct + "%";
+  const cbar = document.getElementById("consistency-bar");
+  cbar.style.width = consistPct + "%";
+  cbar.style.background = consistPct >= 80 ? "#6366F1" : consistPct >= 60 ? "#F59E0B" : "#EF4444";
+
+  const cpill = document.getElementById("consistency-decision-pill");
+  cpill.textContent = (cr.decision || "—").toUpperCase();
+  cpill.setAttribute("style", "padding:4px 10px;border-radius:9999px;font-size:0.75rem;font-weight:700;text-transform:uppercase;" +
+    (cr.decision === "go" ? "background:rgba(34,197,94,0.15);color:#86EFAC" : "background:rgba(239,68,68,0.15);color:#FCA5A5"));
+
+  document.getElementById("discrepancy-list").innerHTML = disc.length
+    ? disc.map(item => {
+        const sev = (item.severity || "low").toLowerCase();
+        const ss = SEV_STYLE[sev] || SEV_STYLE.low;
+        return `<li class="flex items-start gap-3">
+          <span class="px-2 py-0.5 rounded text-xs font-bold uppercase mt-0.5 flex-shrink-0" style="${ss}">${item.severity}</span>
+          <div>
+            <p class="text-sm text-slate-200 leading-snug">${item.description}</p>
+            <p class="text-xs mt-0.5" style="color:#475569">Field: ${humanise(item.field)}</p>
+          </div>
+        </li>`;
+      }).join("")
+    : '<li class="text-xs italic" style="color:#334155">No discrepancies found.</li>';
+}
+
+// ── Concern action classifier ──────────────────────────────────────────────────
+function classifyConcern(text) {
+  const t = text.toLowerCase();
+  // Policy violation → Credit Committee required
+  if (t.match(/cibil.*(below|under|less|threshold|minimum|exception)/))
+    return { label: "Credit Committee Required", why: "CIBIL below policy minimum — manager cannot approve unilaterally", color: "#C4B5FD", bg: "rgba(124,58,237,0.15)", border: "rgba(124,58,237,0.3)" };
+  if (t.match(/ltv.*(exceed|breach|above|over|violate)/))
+    return { label: "Credit Committee Required", why: "LTV exceeds RBI cap — cannot be overridden without committee", color: "#C4B5FD", bg: "rgba(124,58,237,0.15)", border: "rgba(124,58,237,0.3)" };
+  if (t.match(/exceeds eligibility|requested.*exceed|eligible.*only/))
+    return { label: "Credit Committee Required", why: "Loan amount significantly above eligibility — needs committee review", color: "#C4B5FD", bg: "rgba(124,58,237,0.15)", border: "rgba(124,58,237,0.3)" };
+  if (t.match(/fraud|suspect|forged|tamper/))
+    return { label: "Credit Committee Required", why: "Fraud/suspect documents — exception case", color: "#C4B5FD", bg: "rgba(124,58,237,0.15)", border: "rgba(124,58,237,0.3)" };
+  // Customer must act → follow-up / document request
+  if (t.match(/not submitted|missing|not provided|not yet submitted|pending|required.*submit|submit.*required/))
+    return { label: "Customer Action Required", why: "Customer must submit this before case can progress", color: "#FDBA74", bg: "rgba(249,115,22,0.12)", border: "rgba(249,115,22,0.3)" };
+  if (t.match(/only \d+ month|only one month/))
+    return { label: "Customer Action Required", why: "Insufficient document history — request additional months", color: "#FDBA74", bg: "rgba(249,115,22,0.12)", border: "rgba(249,115,22,0.3)" };
+  if (t.match(/mismatch|variance|discrepan|inconsist/))
+    return { label: "Customer Clarification", why: "Customer must explain the discrepancy in writing", color: "#FDBA74", bg: "rgba(249,115,22,0.12)", border: "rgba(249,115,22,0.3)" };
+  // Condition can be verified by bank
+  if (t.match(/noc|encumbrance|certificate|title|registry/))
+    return { label: "Condition — Bank to Verify", why: "Bank to obtain/verify this before disbursement", color: "#93C5FD", bg: "rgba(59,130,246,0.1)", border: "rgba(59,130,246,0.25)" };
+  // Informational
+  return { label: "Note — Monitor", why: "No immediate action needed; watch for changes", color: "#94A3B8", bg: "rgba(100,116,139,0.08)", border: "rgba(100,116,139,0.2)" };
+}
+
+function renderPositivesConcerns(d) {
+  const db = d.underwriter_dashboard || {};
+  document.getElementById("positives-list").innerHTML = (db.key_positives || []).length
+    ? (db.key_positives || []).map(p => `
+        <li class="flex items-start gap-2.5 text-sm text-slate-200 leading-snug">
+          <span style="color:#22C55E;margin-top:2px;flex-shrink:0">●</span><span>${p}</span>
+        </li>`).join("")
+    : '<li class="text-xs italic" style="color:#334155">None listed.</li>';
+
+  const status = d.status || "";
+  const isClosed = ["approved","rejected"].includes(status);
+
+  document.getElementById("concerns-list").innerHTML = (db.key_concerns || []).length
+    ? (db.key_concerns || []).map(c => {
+        const cls = classifyConcern(c);
+        return `<li class="rounded-xl p-3 text-sm leading-snug" style="background:${cls.bg};border:1px solid ${cls.border}">
+          <div class="flex items-start justify-between gap-3 mb-1.5">
+            <span class="text-slate-200">${c}</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="text-xs font-semibold px-2 py-0.5 rounded-full" style="color:${cls.color};background:rgba(0,0,0,0.2)">${cls.label}</span>
+            ${!isClosed ? `<span class="text-xs" style="color:#475569">${cls.why}</span>` : ""}
+          </div>
+        </li>`;
+      }).join("")
+    : '<li class="text-xs italic" style="color:#334155">No concerns raised.</li>';
+}
+
+function renderConditions(d) {
+  const sanction      = d._sanction_conditions || [];
+  const predisbursement = d._predisbursement_conditions || [];
+
+  function renderItem(c, i, color) {
+    // Handle both plain strings and {condition, options} objects
+    if (typeof c === "object" && c !== null && c.condition) {
+      const opts = (c.options || []).map(opt =>
+        `<li class="flex items-start gap-2 leading-snug">
+           <span style="color:${color};opacity:0.5;flex-shrink:0">›</span>
+           <span style="color:#94A3B8;font-size:0.7rem">${opt}</span>
+         </li>`).join("");
+      return `
+        <li class="flex items-start gap-3 text-sm text-slate-200 leading-snug">
+          <span class="w-6 h-6 rounded-full text-xs font-bold flex items-center justify-center flex-shrink-0 mt-0.5"
+                style="background:${color}33;color:${color}">${i+1}</span>
+          <div class="flex-1 min-w-0">
+            <span class="leading-snug">${c.condition}</span>
+            ${opts ? `<ul class="mt-2 space-y-1 ml-1">${opts}</ul>` : ""}
+          </div>
+        </li>`;
+    }
+    return `
+      <li class="flex items-start gap-3 text-sm text-slate-200 leading-snug">
+        <span class="w-6 h-6 rounded-full text-xs font-bold flex items-center justify-center flex-shrink-0 mt-0.5"
+              style="background:${color}33;color:${color}">${i+1}</span>
+        <span>${c}</span>
+      </li>`;
+  }
+
+  const makeList = (items, emptyMsg, color) =>
+    items.length
+      ? items.map((c, i) => renderItem(c, i, color)).join("")
+      : `<li class="text-xs italic" style="color:#334155">${emptyMsg}</li>`;
+
+  document.getElementById("sanction-conditions-list").innerHTML =
+    makeList(sanction, "No sanction conditions — application can proceed.", "#FCA5A5");
+  document.getElementById("predisbursement-list").innerHTML =
+    makeList(predisbursement, "No pre-disbursement items identified.", "#A5B4FC");
+}
+
+// Change 2: Tier badge in recommendation banner
+function renderTierBadge(d) {
+  const tier = d._tier;
+  if (!tier) return;
+  const existing = document.getElementById("tier-badge");
+  if (existing) existing.remove();
+
+  const styles = {
+    1: { bg: "rgba(185,28,28,0.2)", color: "#FCA5A5", border: "rgba(239,68,68,0.4)", icon: "⛔" },
+    2: { bg: "rgba(124,58,237,0.15)", color: "#C4B5FD", border: "rgba(124,58,237,0.4)", icon: "⚖️" },
+    3: { bg: "rgba(34,197,94,0.12)", color: "#86EFAC", border: "rgba(34,197,94,0.3)", icon: "✅" },
+  };
+  const s = styles[tier.tier] || styles[3];
+
+  const rec = document.getElementById("rec-banner");
+  const badge = document.createElement("div");
+  badge.id = "tier-badge";
+  badge.className = "mt-4 rounded-xl p-3";
+  badge.style.cssText = `background:${s.bg};border:1px solid ${s.border}`;
+  badge.innerHTML = `
+    <div class="flex items-center gap-2 mb-1.5">
+      <span>${s.icon}</span>
+      <span class="text-xs font-bold uppercase tracking-wider" style="color:${s.color}">${tier.tier_label}</span>
+    </div>
+    <ul class="space-y-1">
+      ${tier.reasons.map(r => `<li class="text-xs flex gap-2" style="color:${s.color}"><span style="opacity:0.6;flex-shrink:0">→</span>${r}</li>`).join("")}
+    </ul>`;
+  rec.appendChild(badge);
+}
+
+// ── Change 3: Next steps flowchart — only shown AFTER a decision is made ──────
+function renderNextSteps(d) {
+  const status  = d.status || "";
+  const section = document.getElementById("next-steps-section");
+
+  // Hide for pending_manager_decision (no decision made yet)
+  if (status === "pending_manager_decision") return;
+
+  section.classList.remove("hidden");
+
+  const missing   = (d.document_catalogue?.missing_required) || [];
+  const isExc     = d._exception_case;
+  const tier      = d._tier || {};
+  const applicant = (d.applicant || {}).full_name || "Applicant";
+  const cibil     = (d.financial_result || {}).cibil_score;
+  const loanAmt   = (d.loan || {}).loan_amount_requested;
+  const predisbItems = d._predisbursement_conditions || [];
+
+  const missingStr = missing.join("; ") || "requested documents";
+  const predisbStr = predisbItems.length
+    ? predisbItems.map(c => c.split("—")[0].trim()).join(", ")
+    : "NOC, EC, insurance assignment";
+
+  // Build steps based on status
+  let steps = [];
+
+  if (status === "customer_followup_required") {
+    steps = [
+      { icon:"✅", actor:"Underwriting Manager", action:"Requested additional income proof and documents", done:true },
+      { icon:"✉️", actor:"Agent 7 — CustomerComms", action:`Customer notified via SMS + email: submit ${missingStr}`, done:true },
+      { icon:"📂", actor:"Customer", action:`Submit income proof and missing salary slips (${missingStr})`, active:true, urgent: !!(d._deadline_info?.is_overdue) },
+      { icon:"🤖", actor:"Agent 1 — Document Collector", action:"Collects and catalogues newly submitted documents", future:true },
+      { icon:"🔐", actor:"Agent 2 — Document Authenticator", action:"Verifies authenticity of each new document", future:true },
+      { icon:"📊", actor:"Agent 2b — Consistency Checker", action:"Cross-document consistency re-check across full file", future:true },
+      { icon:"👤", actor:"Underwriting Manager", action:"Reviews updated file with complete document set", future:true },
+      ...(isExc && cibil ? [{ icon:"⚖️", actor:"Credit Committee", action:`Reviews CIBIL ${cibil} exception — approve with conditions or reject`, future:true, highlight:true }] : []),
+      ...(predisbItems.length ? [{ icon:"🏦", actor:"Ops Team", action:`Completes pre-disbursement checklist: ${predisbStr}`, future:true }] : []),
+      { icon:"🏁", actor:"Disbursement", action:"Loan disbursed to applicant / seller account", future:true },
+    ];
+  } else if (status === "conditions_pending") {
+    steps = [
+      { icon:"✅", actor:"Underwriting Manager", action:"Issued conditional sanction letter", done:true },
+      { icon:"✉️", actor:"Agent 7 — CustomerComms", action:"Customer notified of conditional approval and conditions", done:true },
+      { icon:"📋", actor:"Underwriting Manager", action:"Verifies all sanction conditions are met", active:true },
+      { icon:"🏦", actor:"Ops Team", action:`Pre-disbursement checklist: ${predisbStr}`, future:true },
+      { icon:"🏁", actor:"Disbursement", action:"Final approval and disbursement", future:true },
+    ];
+  } else if (status === "committee_review") {
+    const tierReasons = (tier.reasons || []).join("; ");
+    steps = [
+      { icon:"✅", actor:"Underwriting Manager", action:`Escalated exception case to Credit Committee (${tierReasons})`, done:true },
+      { icon:"⚖️", actor:"Credit Committee", action:"Reviews exception — deliberates on deviation from policy", active:true, highlight:true },
+      { icon:"👤", actor:"Underwriting Manager", action:"Records committee decision in the system", future:true },
+      ...(predisbItems.length ? [{ icon:"🏦", actor:"Ops Team", action:`Pre-disbursement checklist: ${predisbStr}`, future:true }] : []),
+      { icon:"🏁", actor:"Disbursement / Rejection", action:"Outcome per committee ruling", future:true },
+    ];
+  } else if (status === "approved") {
+    steps = [
+      { icon:"✅", actor:"Underwriting Manager", action:"Loan approved — sanction letter issued", done:true },
+      { icon:"✉️", actor:"Agent 7 — CustomerComms", action:"Approval communicated to customer", done:true },
+      { icon:"🏦", actor:"Ops Team", action:`Completing pre-disbursement checklist: ${predisbStr}`, active:true },
+      { icon:"🏁", actor:"Disbursement", action:"Loan disbursed — case closed", future:true },
+    ];
+  } else if (status === "rejected") {
+    const tierReasons = (tier.reasons || []).slice(0, 2).join("; ");
+    steps = [
+      { icon:"⛔", actor:"Underwriting Manager", action:`Application rejected: ${tierReasons}`, done:true },
+      { icon:"✉️", actor:"Agent 7 — CustomerComms", action:"Rejection communicated to customer with reapplication guidance", done:true },
+      { icon:"📁", actor:"Ops Team", action:"File archived — application closed", done:true },
+    ];
+  }
+
+  if (!steps.length) return;
+
+  function stepBg(step) {
+    if (step.done)    return "background:#1e293b;border:1px solid #334155";
+    if (step.active)  return "background:linear-gradient(135deg,#F97316,#EA580C);box-shadow:0 0 16px rgba(249,115,22,0.35)";
+    if (step.highlight) return "background:rgba(124,58,237,0.3);border:2px solid #7C3AED";
+    return "background:#13112A;border:1px solid rgba(99,79,176,0.3)";
+  }
+  function actorColor(step) {
+    if (step.done)      return "#334155";
+    if (step.active)    return "#FDBA74";
+    if (step.highlight) return "#C4B5FD";
+    return "#475569";
+  }
+  function labelColor(step) {
+    if (step.done)      return "color:#475569";
+    if (step.active)    return "color:#F97316;font-weight:700";
+    if (step.highlight) return "color:#A78BFA;font-weight:600";
+    return "color:#64748B";
+  }
+  function arrowColor(i) {
+    return steps[i].done && (steps[i+1] || {}).done ? "#1e293b" : "rgba(99,79,176,0.35)";
+  }
+
+  document.getElementById("flowchart-container").innerHTML = `
+    <div class="flex items-start gap-0 min-w-max pb-2">
+      ${steps.map((step, i) => `
+        <div class="flex items-start">
+          <div class="flex flex-col items-center w-40 text-center px-1">
+            <div class="w-12 h-12 rounded-full flex items-center justify-center text-xl mb-2 flex-shrink-0 ${step.done?"opacity-50":""}"
+                 style="${stepBg(step)}">
+              ${step.icon}
+            </div>
+            <p class="text-xs font-bold mb-0.5 leading-tight" style="${labelColor(step)};max-width:140px">${step.actor}</p>
+            <p class="text-xs leading-tight" style="color:${actorColor(step)};max-width:140px">${step.action}</p>
+            ${step.urgent ? '<span class="mt-1 text-xs font-bold px-2 py-0.5 rounded-full" style="background:rgba(185,28,28,0.3);color:#FCA5A5">OVERDUE</span>' : ""}
+          </div>
+          ${i < steps.length - 1 ? `
+            <div class="flex items-center mt-5 flex-shrink-0">
+              <div class="w-5 h-0.5" style="background:${arrowColor(i)}"></div>
+              <svg class="w-3 h-3" style="color:${arrowColor(i)};flex-shrink:0" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/>
+              </svg>
+            </div>` : ""}
+        </div>`).join("")}
+    </div>`;
+}
+
+function renderCommunications(d) {
+  const status = d.status || "";
+  const commsSection = document.getElementById("comms-section");
+  const activeCommsStatuses = ["customer_followup_required","conditions_pending","committee_review","approved","rejected"];
+  if (!activeCommsStatuses.includes(status)) return;
+  commsSection.classList.remove("hidden");
+
+  const comms = d.customer_communications || [];
+  if (!comms.length) {
+    document.getElementById("comms-empty").classList.remove("hidden");
+    return;
+  }
+
+  const responseStyle = {
+    pending:  { color:"#FCD34D", bg:"rgba(245,158,11,0.12)", label:"⏳ Pending" },
+    received: { color:"#86EFAC", bg:"rgba(34,197,94,0.12)",  label:"✓ Received" },
+    overdue:  { color:"#FCA5A5", bg:"rgba(239,68,68,0.12)",  label:"⚠ Overdue" },
+  };
+
+  document.getElementById("comms-list").innerHTML = comms.map((c, i) => {
+    const rs = responseStyle[(c.customer_response_status||"pending").toLowerCase()] || responseStyle.pending;
+    const routed = c.orchestrated ? c.routed_via || "Orchestrator → CustomerCommsAgent" : "CustomerCommsAgent (direct)";
+    return `
+    <div class="px-5 py-4 border-b last:border-0" style="border-color:rgba(99,79,176,0.1)">
+      <div class="flex items-start justify-between gap-4 mb-3">
+        <div class="min-w-0">
+          <div class="flex items-center gap-2 flex-wrap mb-1">
+            <span class="text-xs font-semibold px-2 py-0.5 rounded" style="background:rgba(99,102,241,0.2);color:#A5B4FC">${humanise(c.comm_type)}</span>
+            <span class="text-xs px-2 py-0.5 rounded-full font-semibold" style="background:${rs.bg};color:${rs.color}">${rs.label}</span>
+          </div>
+          <p class="text-sm font-semibold text-slate-200">${c.subject_line || "—"}</p>
+          <div class="flex flex-wrap gap-x-3 mt-1">
+            <p class="text-xs" style="color:#475569">Sent ${formatDateTime(c.sent_at)}</p>
+            <p class="text-xs" style="color:#334155">via ${(c.sent_via || ["agent"]).join(" + ")}</p>
+            <p class="text-xs" style="color:#334155">routed: ${routed}</p>
+          </div>
+        </div>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
+        ${c.sms_message ? `
+        <div class="px-3 py-2 rounded-lg" style="background:#0F0E24;border:1px solid rgba(99,79,176,0.2)">
+          <p class="text-xs font-semibold mb-1" style="color:#A78BFA">📱 SMS</p>
+          <p class="text-xs text-slate-300 leading-relaxed">${c.sms_message}</p>
+        </div>` : ""}
+        ${c.action_items?.length ? `
+        <div class="px-3 py-2 rounded-lg" style="background:#0F0E24;border:1px solid rgba(99,79,176,0.2)">
+          <p class="text-xs font-semibold mb-1" style="color:#A78BFA">📋 Customer Action Items</p>
+          <ul class="space-y-1">
+            ${c.action_items.map(a => `<li class="text-xs text-slate-400 flex gap-2"><span style="color:#F97316;flex-shrink:0">→</span>${a}</li>`).join("")}
+          </ul>
+          ${c.deadline_days ? `<p class="text-xs mt-2" style="color:#64748B">Deadline: ${c.deadline_days} days from dispatch</p>` : ""}
+        </div>` : ""}
+      </div>
+      <details class="mt-1">
+        <summary class="text-xs cursor-pointer hover:text-slate-300 transition-colors" style="color:#475569">View full email ▸</summary>
+        <pre class="mt-2 text-xs text-slate-400 whitespace-pre-wrap font-sans leading-relaxed px-3 py-2 rounded" style="background:#0a0918">${(c.email_body || "").replace(/</g,"&lt;")}</pre>
+      </details>
+      ${i === comms.length - 1 ? `
+      <div class="mt-3 flex justify-end">
+        <button id="resend-comms-btn" onclick="draftCommunication(true)"
+                class="px-3 py-1.5 rounded-lg text-xs font-semibold text-white transition-all"
+                style="background:#374151;border:1px solid rgba(100,116,139,0.4)">
+          Resend
+        </button>
+      </div>` : ""}
+    </div>`;
+  }).join("");
+}
+
+async function draftCommunication(isResend) {
+  const btnId = isResend ? "resend-comms-btn" : "draft-comms-btn";
+  const btn = document.getElementById(btnId);
+  if (!btn) return;
+
+  // State: Sending...
+  btn.disabled = true;
+  btn.textContent = "Sending...";
+  btn.setAttribute("style", btn.getAttribute("style").replace(/background:[^;]+;?/g, "") +
+    ";background:#374151;opacity:0.8");
+
+  const minDisplayMs = 600;
+  const startMs = Date.now();
+
+  try {
+    const res  = await fetch(`/api/orchestrate/communicate/${currentAppId}`, { method: "POST" });
+    const body = await res.json();
+
+    // Ensure "Sending..." shows for at least minDisplayMs
+    const elapsed = Date.now() - startMs;
+    if (elapsed < minDisplayMs) await new Promise(r => setTimeout(r, minDisplayMs - elapsed));
+
+    if (!res.ok) throw new Error("server");
+
+    // State: Sent ✓ HH:MM
+    const ts = new Date().toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" });
+    btn.textContent = `Sent ✓ ${ts}`;
+    btn.setAttribute("style", btn.getAttribute("style").replace(/background:[^;]+;?/g, "") +
+      ";background:#166534;color:#BBF7D0;border:1px solid rgba(34,197,94,0.3)");
+
+    // Refresh comms log
+    const appRes = await fetch(`/api/application/${currentAppId}`);
+    appData = await appRes.json();
+    document.getElementById("comms-list").innerHTML = "";
+    document.getElementById("comms-empty").classList.add("hidden");
+    renderCommunications(appData);
+  } catch (_) {
+    // State: Retry (never show error text)
+    btn.disabled = false;
+    btn.textContent = "Retry";
+    btn.setAttribute("style", btn.getAttribute("style").replace(/background:[^;]+;?/g, "") +
+      ";background:#78350F;color:#FDE68A;border:1px solid rgba(245,158,11,0.4);opacity:1");
+  }
+}
+
+// ── Master render ──────────────────────────────────────────────────────────────
+function renderAll(d) {
+  renderHeader(d);
+  renderActionBanner(d);
+  renderBorrowerStrip(d);
+  renderRecommendationBanner(d);
+  renderTierBadge(d);          // Change 2
+  renderKYC(d);
+  renderFinancials(d);
+  renderProperty(d);
+  renderDocuments(d);
+  renderPositivesConcerns(d);
+  renderConditions(d);
+  renderNextSteps(d);
+  renderCommunications(d);
+  renderEscalationAudit(d);
+}
+
+// ── Scorecard accordion ────────────────────────────────────────────────────────
+document.querySelectorAll(".scorecard-toggle").forEach(btn => {
+  btn.addEventListener("click", () => {
+    const target  = document.getElementById(btn.dataset.target);
+    const chevron = btn.querySelector(".chevron-icon");
+    const isOpen  = target.classList.contains("open");
+    target.classList.toggle("open", !isOpen);
+    chevron.classList.toggle("open", !isOpen);
+  });
+});
+
+// ── Decision panel ─────────────────────────────────────────────────────────────
+function initDecisionPanel(d) {
+  const status = d.status || "";
+
+  if (["approved","rejected"].includes(status)) {
+    showConfirmedState(status, d.follow_up_at || d.manager_decision_at, d.follow_up_notes || d.manager_notes);
+    return;
+  }
+  if (status === "pending_manager_decision") {
+    showInitialDecisionPanel(d);
+    return;
+  }
+  if (["customer_followup_required","conditions_pending","committee_review"].includes(status)) {
+    showFollowUpPanel(d);
+    return;
+  }
+}
+
+function showInitialDecisionPanel(d) {
+  document.getElementById("decision-panel").classList.remove("hidden");
+  document.getElementById("decision-app-ref").textContent = "Application: " + (d.application_id || "—");
+
+  document.querySelectorAll(".cta-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      selectedDecision = btn.dataset.decision;
+      document.querySelectorAll(".cta-btn").forEach(b => {
+        if (b === btn) {
+          b.style.outline = "2px solid white";
+          b.style.outlineOffset = "2px";
+          b.style.opacity = "1";
+        } else {
+          b.style.outline = "none";
+          b.style.opacity = "0.4";
+        }
+      });
+      const labels = {
+        approve:      "Approve the loan — final sanction (auto-routes to conditional if conditions exist)",
+        request_info: "Request additional information from customer — 7-day deadline",
+        reject:       "Reject this application",
+      };
+      document.getElementById("selected-decision-label").textContent =
+        "Selected: " + (labels[selectedDecision] || humanise(selectedDecision));
+      const sb = document.getElementById("submit-btn");
+      sb.disabled = false;
+      sb.setAttribute("style", "padding:10px 20px;border-radius:12px;font-size:0.875rem;font-weight:700;background:linear-gradient(135deg,#F97316,#EA580C);color:white;cursor:pointer;transition:all 0.15s;box-shadow:0 4px 15px rgba(249,115,22,0.3)");
+    });
+  });
+
+  document.getElementById("submit-btn").addEventListener("click", submitDecision);
+}
+
+async function submitDecision() {
+  if (!selectedDecision) return;
+  const sb = document.getElementById("submit-btn");
+  sb.disabled = true; sb.textContent = "Submitting…";
+  const notes = document.getElementById("decision-notes").value.trim();
+
+  try {
+    const res  = await fetch("/api/decision", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ decision: selectedDecision, notes, app_id: currentAppId }),
+    });
+    const body = await res.json();
+    if (!res.ok) {
+      sb.disabled = false; sb.textContent = "Submit Decision";
+      alert("Error: " + (body.detail || "Unknown error."));
+      return;
+    }
+    if (["approved","rejected"].includes(body.status)) {
+      showConfirmedState(body.status, body.decided_at, notes);
+    } else {
+      location.reload();
+    }
+    if (appData) { appData.status = body.status; renderHeader(appData); }
+  } catch (err) {
+    sb.disabled = false; sb.textContent = "Submit Decision";
+    alert("Network error: " + err.message);
+  }
+}
+
+// ── CC checklist + acknowledgement gate ───────────────────────────────────────
+function renderCCChecklist(d) {
+  const checklist = d._cc_checklist || [];
+  if (!checklist.length) return "";
+
+  const STATUS_STYLE = {
+    "Pending Customer Submission":    { color:"#FDBA74", bg:"rgba(234,88,12,0.12)", icon:"☐" },
+    "Pending Underwriter Action":     { color:"#A5B4FC", bg:"rgba(99,102,241,0.12)", icon:"☐" },
+    "Received — Awaiting Verification":{ color:"#86EFAC", bg:"rgba(34,197,94,0.1)",   icon:"☑" },
+  };
+
+  const rows = checklist.map(item => {
+    const s = STATUS_STYLE[item.status] || STATUS_STYLE["Pending Customer Submission"];
+    return `
+      <div class="flex items-start gap-2.5 py-2 border-b last:border-0" style="border-color:rgba(99,79,176,0.1)">
+        <span class="flex-shrink-0 mt-0.5 font-bold text-base" style="color:${s.color}">${s.icon}</span>
+        <div class="flex-1 min-w-0">
+          <p class="text-xs text-slate-300 leading-snug">${item.description}</p>
+          <span class="inline-block mt-1 px-1.5 py-0.5 rounded text-xs font-medium"
+                style="background:${s.bg};color:${s.color}">${item.status}</span>
+        </div>
+      </div>`;
+  }).join("");
+
+  return `
+    <div class="mb-3 rounded-xl overflow-hidden" style="border:1px solid rgba(245,158,11,0.25)">
+      <div class="px-4 py-2.5 flex items-center gap-2" style="background:#0F0E24;border-bottom:1px solid rgba(245,158,11,0.15)">
+        <span class="text-amber-400 text-xs">⚖</span>
+        <p class="text-xs font-semibold" style="color:rgba(245,158,11,0.8)">Outstanding Items — Credit Committee File</p>
+      </div>
+      <div class="px-4 py-1">${rows}</div>
+      <div class="px-4 py-3 border-t" style="border-color:rgba(245,158,11,0.15);background:rgba(120,53,15,0.06)">
+        <label class="flex items-start gap-2.5 cursor-pointer">
+          <input type="checkbox" id="cc-ack-check" class="mt-0.5 flex-shrink-0"
+                 style="accent-color:#F59E0B;width:14px;height:14px"
+                 onchange="onCCAcknowledge(this.checked)">
+          <span class="text-xs leading-relaxed" style="color:#94A3B8">
+            I confirm I have reviewed all available information for this application and acknowledge
+            that the items listed above are outstanding. I am escalating to the Credit Committee
+            on the basis of available information.
+          </span>
+        </label>
+      </div>
+    </div>`;
+}
+
+function onCCAcknowledge(checked) {
+  const btn = document.getElementById("cc-confirm-btn");
+  if (!btn) return;
+  btn.disabled = !checked;
+  btn.setAttribute("style",
+    `padding:8px 16px;border-radius:10px;font-size:0.8125rem;font-weight:600;transition:all 0.15s;` +
+    (checked
+      ? "background:#78350F;border:1px solid rgba(245,158,11,0.4);color:white;cursor:pointer"
+      : "background:#1e1c3a;border:1px solid rgba(100,116,139,0.2);color:#475569;cursor:not-allowed;opacity:0.55"));
+}
+
+let _ccAccordionData = null;   // holds the current appData when accordion is open
+
+function showCCAccordion(d) {
+  _ccAccordionData = d;
+  const existing = document.getElementById("cc-accordion");
+  if (existing) existing.remove();
+
+  const STATUS_STYLE = {
+    "Pending Customer Submission":    { color:"#FDBA74", icon:"☐" },
+    "Pending Underwriter Action":     { color:"#A5B4FC", icon:"☐" },
+    "Received — Awaiting Verification":{ color:"#86EFAC", icon:"☑" },
+  };
+
+  const rows = (d._cc_checklist || []).map(item => {
+    const s = STATUS_STYLE[item.status] || STATUS_STYLE["Pending Customer Submission"];
+    const desc = item.description.replace(/</g,"&lt;");
+    const badge = `<span class="text-xs px-1.5 py-0.5 rounded" style="color:${s.color};background:rgba(0,0,0,0.2)">${item.status}</span>`;
+    return `<div class="flex items-start gap-2 py-1.5 border-b last:border-0" style="border-color:rgba(245,158,11,0.08)">
+      <span class="flex-shrink-0 font-bold mt-0.5" style="color:${s.color}">${s.icon}</span>
+      <div>
+        <p class="text-xs text-slate-300 leading-snug">${desc}</p>
+        <div class="mt-0.5">${badge}</div>
+      </div>
+    </div>`;
+  }).join("");
+
+  const accordionHtml = `
+    <div id="cc-accordion" class="mt-3 rounded-xl overflow-hidden" style="border:1px solid rgba(245,158,11,0.25)">
+      <div class="px-4 py-2.5 flex items-center justify-between" style="background:#0F0E24;border-bottom:1px solid rgba(245,158,11,0.12)">
+        <p class="text-xs font-semibold" style="color:rgba(245,158,11,0.8)">Outstanding Items at Time of Escalation</p>
+        <button onclick="hideCCAccordion()" class="text-slate-600 hover:text-slate-400 text-xs">✕ Cancel</button>
+      </div>
+      <div class="px-4 py-2">${rows || '<p class="text-xs text-slate-600 py-1">No outstanding items identified.</p>'}</div>
+      <div class="px-4 py-3 border-t" style="border-color:rgba(245,158,11,0.12);background:rgba(120,53,15,0.05)">
+        <label class="flex items-start gap-2.5 cursor-pointer">
+          <input type="checkbox" id="cc-ack-check" class="mt-0.5 flex-shrink-0"
+                 style="accent-color:#F59E0B;width:13px;height:13px"
+                 onchange="onCCAcknowledge(this.checked)">
+          <span class="text-xs leading-relaxed" style="color:#94A3B8">
+            I confirm I have reviewed all available information for this application and acknowledge
+            that the items listed above are outstanding. I am escalating to the Credit Committee
+            on the basis of available information.
+          </span>
+        </label>
+      </div>
+      <div class="px-4 py-3 flex items-center gap-3 border-t" style="border-color:rgba(245,158,11,0.12)">
+        <button id="cc-confirm-btn" disabled
+                style="padding:8px 16px;border-radius:10px;font-size:0.8125rem;font-weight:600;background:#1e1c3a;border:1px solid rgba(100,116,139,0.2);color:#475569;cursor:not-allowed;opacity:0.55">
+          Confirm Escalation
+        </button>
+        <button onclick="hideCCAccordion()" class="text-xs hover:text-slate-300 transition-colors" style="color:#475569">
+          Cancel
+        </button>
+      </div>
+    </div>`;
+
+  // Insert after the buttons row inside followup-panel
+  const btnsEl = document.getElementById("followup-buttons");
+  btnsEl.insertAdjacentHTML("afterend", accordionHtml);
+
+  // Wire confirm button
+  document.getElementById("cc-confirm-btn").addEventListener("click", () => {
+    const appId = (document.getElementById("followup-app-ref").textContent || "").replace("Application: ","").trim();
+    submitAction(appId, "escalate_committee");
+  });
+}
+
+function hideCCAccordion() {
+  const el = document.getElementById("cc-accordion");
+  if (el) el.remove();
+  _ccAccordionData = null;
+}
+
+function renderEscalationAudit(d) {
+  const audit = d.cc_escalation_audit;
+  const section = document.getElementById("escalation-audit-section");
+  if (!audit) return;
+  section.classList.remove("hidden");
+
+  const formatISO = iso => { try { return new Date(iso).toLocaleString("en-IN",{day:"2-digit",month:"short",year:"numeric",hour:"2-digit",minute:"2-digit"}); } catch { return iso; } };
+
+  const pendingRows = (audit.pending_items || []).map(i =>
+    `<li class="flex items-start gap-2 text-xs text-slate-400"><span style="color:#F59E0B;flex-shrink:0">☐</span>${i}</li>`).join("");
+  const receivedRows = (audit.received_items || []).map(i =>
+    `<li class="flex items-start gap-2 text-xs text-slate-400"><span style="color:#86EFAC;flex-shrink:0">☑</span>${i}</li>`).join("");
+
+  document.getElementById("escalation-audit-body").innerHTML = `
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
+      <div>
+        <p class="text-xs text-slate-500 mb-0.5">Escalated by</p>
+        <p class="text-sm font-semibold text-slate-200">${audit.escalated_by || "—"}</p>
+      </div>
+      <div>
+        <p class="text-xs text-slate-500 mb-0.5">Escalated at</p>
+        <p class="text-sm font-semibold text-slate-200">${formatISO(audit.escalated_at)}</p>
+      </div>
+      <div>
+        <p class="text-xs text-slate-500 mb-0.5">Checklist at escalation</p>
+        <p class="text-sm font-semibold text-slate-200">${audit.pending_count} pending · ${audit.received_count} received</p>
+      </div>
+    </div>
+    ${pendingRows ? `<div class="mb-3"><p class="text-xs font-semibold mb-2" style="color:#F59E0B">Outstanding at time of escalation</p><ul class="space-y-1.5">${pendingRows}</ul></div>` : ""}
+    ${receivedRows ? `<div><p class="text-xs font-semibold mb-2" style="color:#86EFAC">Received items at time of escalation</p><ul class="space-y-1.5">${receivedRows}</ul></div>` : ""}
+    <p class="text-xs mt-3 pt-3 border-t" style="border-color:rgba(245,158,11,0.15);color:#475569">
+      Underwriter acknowledged outstanding items before escalation. This record is immutable.
+    </p>`;
+}
+
+function showFollowUpPanel(d) {
+  const status = d.status || "";
+  const appId  = d.application_id;
+  document.getElementById("followup-panel").classList.remove("hidden");
+  document.getElementById("followup-app-ref").textContent = "Application: " + appId;
+
+  // CC only appears for Tier 2 policy exception cases — Step 1
+  const isExc = d._exception_case === true;
+
+  const configs = {
+    customer_followup_required: {
+      title:       "Customer Follow-up — Finalise Decision",
+      instruction: "Review the customer's response and documents, then select an action:",
+      buttons: [
+        { action: "finalise_approve", label: "Approve", style: "background:#166534;border:1px solid rgba(34,197,94,0.3)" },
+        { action: "finalise_reject",  label: "Reject",  style: "background:#7f1d1d;border:1px solid rgba(239,68,68,0.4)" },
+        ...(isExc ? [{ action: "escalate_committee", label: "Send to Credit Committee", isCC: true }] : []),
+      ],
+    },
+    conditions_pending: {
+      title:       "Condition Verification — Finalise Approval",
+      instruction: "Verify all conditions have been met before finalising:",
+      buttons: [
+        { action: "conditions_met",  label: "Approve", style: "background:#166534;border:1px solid rgba(34,197,94,0.3)" },
+        { action: "finalise_reject", label: "Reject",  style: "background:#7f1d1d;border:1px solid rgba(239,68,68,0.4)" },
+        ...(isExc ? [{ action: "escalate_committee", label: "Send to Credit Committee", isCC: true }] : []),
+      ],
+    },
+    committee_review: {
+      title:       "Credit Committee — Record Decision",
+      instruction: "Record the Credit Committee's decision for this exception case:",
+      buttons: [
+        { action: "committee_approve", label: "Approve", style: "background:#166534;border:1px solid rgba(34,197,94,0.3)" },
+        { action: "committee_reject",  label: "Reject",  style: "background:#7f1d1d;border:1px solid rgba(239,68,68,0.4)" },
+      ],
+    },
+  };
+
+  const cfg = configs[status];
+  if (!cfg) return;
+
+  document.getElementById("followup-title").textContent       = cfg.title;
+  document.getElementById("followup-instruction").textContent = cfg.instruction;
+
+  document.getElementById("followup-buttons").innerHTML = cfg.buttons.map(b => {
+    if (b.isCC) {
+      return `
+        <div>
+          <button id="cc-escalate-btn"
+                  class="followup-btn px-4 py-2.5 rounded-xl text-sm font-semibold text-white transition-all"
+                  style="background:#78350F;border:1px solid rgba(245,158,11,0.4)">
+            Send to Credit Committee
+          </button>
+        </div>`;
+    }
+    return `
+      <div>
+        <button data-action="${b.action}"
+                class="followup-btn px-4 py-2.5 rounded-xl text-sm font-semibold text-white transition-all"
+                style="${b.style}">
+          ${b.label}
+        </button>
+      </div>`;
+  }).join("");
+
+  // CC button opens accordion (does not submit directly)
+  const ccBtn = document.getElementById("cc-escalate-btn");
+  if (ccBtn) {
+    ccBtn.addEventListener("click", () => {
+      const existing = document.getElementById("cc-accordion");
+      if (existing) { hideCCAccordion(); return; }
+      showCCAccordion(d);
+    });
+  }
+
+  // Non-exception explanation text for follow-up states without CC
+  const existingNote = document.getElementById("cc-unavailable-note");
+  if (existingNote) existingNote.remove();
+  if (!isExc && ["customer_followup_required","conditions_pending"].includes(status)) {
+    const tier = (d._tier || {}).tier;
+    const tierReasons = ((d._tier || {}).reasons || []).slice(0,2);
+    let noteText = "";
+    if (tier === 1) {
+      noteText = "Hard reject — Credit Committee escalation is not available for applications with fundamental eligibility failures (CIBIL below 600, confirmed document fraud, or severe LTV breach).";
+    } else {
+      noteText = "Credit Committee not required for this case — no policy exceptions identified " +
+        (tierReasons.length ? `(${tierReasons.join("; ")})` : "(CIBIL, LTV, FOIR, and eligibility are all within policy limits)") +
+        ". Manager can approve or reject directly.";
+    }
+    const btnsEl = document.getElementById("followup-buttons");
+    btnsEl.insertAdjacentHTML("afterend",
+      `<p id="cc-unavailable-note" class="text-xs mt-2 leading-snug" style="color:#475569">
+        <span style="color:#64748B">ⓘ</span> ${noteText}
+      </p>`);
+  }
+
+  document.querySelectorAll(".followup-btn").forEach(btn => {
+    if (btn.id === "cc-escalate-btn") return;  // handled above
+    btn.addEventListener("click", () => submitAction(appId, btn.dataset.action));
+  });
+}
+
+async function submitAction(appId, action) {
+  const notes = document.getElementById("followup-notes").value.trim();
+  const btn = document.querySelector(`[data-action="${action}"]`);
+  if (btn) { btn.disabled = true; btn.textContent = "Submitting…"; }
+
+  // Step 4: collect checklist state at time of CC escalation
+  const checklistState = action === "escalate_committee" && appData
+    ? (appData._cc_checklist || [])
+    : undefined;
+
+  try {
+    const res  = await fetch(`/api/action/${appId}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action, notes, checklist_state: checklistState }),
+    });
+    const body = await res.json();
+    if (!res.ok) {
+      if (btn) { btn.disabled = false; btn.textContent = btn.dataset.action; }
+      alert("Error: " + (body.detail || "Unknown error."));
+      return;
+    }
+    showConfirmedState(body.status, body.action_at, notes);
+    if (appData) { appData.status = body.status; renderHeader(appData); }
+  } catch (err) {
+    if (btn) { btn.disabled = false; }
+    alert("Network error: " + err.message);
+  }
+}
+
+function showConfirmedState(status, decidedAt, notes) {
+  document.getElementById("decision-panel").classList.add("hidden");
+  document.getElementById("followup-panel").classList.add("hidden");
+  const banner = document.getElementById("decision-confirmed");
+  banner.classList.remove("hidden");
+
+  const iconEl = document.getElementById("confirmed-icon");
+  if (status === "rejected") {
+    iconEl.setAttribute("style", "width:48px;height:48px;border-radius:9999px;display:flex;align-items:center;justify-content:center;flex-shrink:0;background:rgba(127,29,29,0.5);color:#FCA5A5;font-size:1.5rem;font-weight:700");
+    iconEl.innerHTML = "✗";
+  } else {
+    iconEl.setAttribute("style", "width:48px;height:48px;border-radius:9999px;display:flex;align-items:center;justify-content:center;flex-shrink:0;background:rgba(22,101,52,0.5);color:#86EFAC;font-size:1.5rem;font-weight:700");
+    iconEl.innerHTML = "✓";
+  }
+
+  const labels = { approved: "Application Approved — final decision recorded.", rejected: "Application Rejected — final decision recorded." };
+  document.getElementById("confirmed-msg").textContent = labels[status] || "Decision recorded — " + humanise(status);
+  document.getElementById("confirmed-detail").textContent =
+    "At: " + formatDateTime(decidedAt) +
+    (notes ? "  |  Notes: " + notes.substring(0, 80) + (notes.length > 80 ? "…" : "") : "");
+}
+
+function showLoadError(msg) {
+  document.getElementById("decision-panel").classList.add("hidden");
+  document.body.insertAdjacentHTML("beforeend", `
+    <div class="fixed inset-0 flex items-center justify-center z-50 p-6" style="background:rgba(12,11,29,0.93)">
+      <div class="rounded-2xl p-8 max-w-lg w-full text-center shadow-2xl" style="background:#13112A;border:1px solid rgba(239,68,68,0.4)">
+        <div class="text-4xl mb-4">⚠️</div>
+        <p style="color:#FCA5A5;font-weight:600;font-size:1.125rem;margin-bottom:8px">Failed to load application</p>
+        <p class="text-slate-400 text-sm mb-4">${msg}</p>
+        <a href="/" style="color:#A78BFA;font-size:0.875rem">← Back to Application Queue</a>
+      </div>
+    </div>`);
+}
+
+// ── Bootstrap ──────────────────────────────────────────────────────────────────
+document.addEventListener("DOMContentLoaded", async () => {
+  const params = new URLSearchParams(window.location.search);
+  const appId  = params.get("id");
+  currentAppId = appId;
+  const url    = appId ? `/api/application/${appId}` : "/api/application";
+
+  try {
+    const res = await fetch(url);
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ detail: res.statusText }));
+      throw new Error(err.detail || res.statusText);
+    }
+    appData = await res.json();
+    renderAll(appData);
+    initDecisionPanel(appData);
+  } catch (err) {
+    showLoadError(err.message);
+  }
+});
+</script>
+</body>
+</html>
