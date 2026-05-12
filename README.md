@@ -1,99 +1,144 @@
-# IndiaBank Mortgage Underwriting Agent
+# Mortgage Underwriting Agent · India retail home loans
 
-An AI-powered retail mortgage underwriting system that processes home loan applications through a sequential 7-agent pipeline and surfaces findings to a human underwriting manager via a decision dashboard. The system automates document collection, authentication, KYC verification, credit assessment, and property evaluation — work that typically takes days — while keeping every credit decision in the hands of a qualified underwriter. No agent approves or rejects a loan autonomously.
+> **A 7-agent pipeline that processes a home-loan application end to end and hands the
+> human underwriter a decision-ready dashboard. No agent ever approves or rejects
+> autonomously — every credit call stays with the manager.**
 
----
+![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)
+![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)
+![Model: Claude](https://img.shields.io/badge/model-Claude-D97757.svg)
+![Status: research preview](https://img.shields.io/badge/status-research%20preview-orange.svg)
 
-## Agent Architecture
+<p align="center">
+  <img src="docs/architecture.svg" alt="7-agent mortgage underwriting pipeline with cost gate and human-in-the-loop" width="100%"/>
+</p>
 
-The pipeline is managed by `MortgageUnderwritingOrchestrator` and runs agents in fixed sequence. All agent outputs feed the underwriter dashboard; none trigger automatic decisions.
-
-| # | Agent | Role |
-|---|-------|------|
-| 1 | **DocumentCollector** | Classifies and catalogues uploaded files; identifies missing required documents |
-| 2 | **DocumentAuthenticator** | Authenticates each document individually — stamps, watermarks, field consistency |
-| 2b | **ConsistencyChecker** | Cross-document verification and cost gate; blocks external API calls if the file has fundamental inconsistencies |
-| 3 | **KYCVerifier** | Verifies identity against Aadhaar and PAN; checks name/DOB match and PAN–Aadhaar linkage |
-| 4 | **FinancialVerifier** | Pulls CIBIL score, calculates FOIR, verifies income via Account Aggregator |
-| 5 | **PropertyVerifier** | Confirms title clarity, LTV ratio, and valuation via sub-registrar records |
-| 6 | **DashboardCompiler** | Synthesises all agent outputs into a structured underwriter dashboard with risk rating and conditions |
-| 7 | **CustomerComms** | Drafts and routes customer-facing communications (document requests, conditional approvals, status updates) |
-
-Agent 2b is a **cost gate**: if cross-document consistency fails, the pipeline routes directly to Agent 7 to request corrected documents, skipping the paid external API calls in Agents 3–5.
+> **Dashboard preview** — capture instructions in [`docs/SCREENSHOT.md`](docs/SCREENSHOT.md).
+> Once captured, the image lives at `docs/dashboard.png` and renders here:
+>
+> <p align="center"><img src="docs/dashboard.png" alt="Underwriter decision dashboard"/></p>
 
 ---
 
-## Setup and Demo
+## Why this exists
 
-**Prerequisites:** Python 3.11+, an Anthropic API key.
+Indian retail mortgage underwriting is a paper-heavy, multi-system workflow: an
+underwriter has to chase KYC matches across Aadhaar and PAN, sanity-check
+income against bank statements and Form 16, validate property title with the
+sub-registrar, and reconcile everything against RBI policy on FOIR and LTV.
+Most of that is patterning, not judgement. This project pushes the patterning
+to a sequence of focused LLM agents and reserves the judgement for a human at
+a clean dashboard.
+
+Two design choices worth flagging up front:
+
+A **cost gate at step 2b.** Before any paid third-party API is hit
+(Aadhaar / PAN / CIBIL / land registry), a consistency-check agent decides
+go/no-go on the document set. Applications with fundamental inconsistencies
+are routed back to the customer for corrections instead of burning API spend.
+
+A **human-in-the-loop terminus.** Step 6 compiles a structured dashboard —
+risk level, key positives, key concerns, conditions for approval, data gaps —
+but the recommendation is explicitly preliminary. The manager owns the
+decision; the agents own the prep.
+
+## Agent map
+
+| # | Agent | Job |
+|---|-------|-----|
+| 1 | DocumentCollector | Classify and catalogue uploaded files |
+| 2 | DocumentAuthenticator | Per-document authenticity check |
+| 2b | ConsistencyChecker | Cross-document checks · go/no-go cost gate |
+| 3 | KYCVerifier | Aadhaar + PAN verification |
+| 4 | FinancialVerifier | CIBIL score, FOIR, Account Aggregator |
+| 5 | PropertyVerifier | Title, encumbrance, LTV vs RBI cap |
+| 6 | DashboardCompiler | Synthesise into underwriter dashboard |
+| 7 | CustomerComms | Draft customer follow-ups |
+
+## Run it
+
+Prerequisites: Python 3.11+, an Anthropic API key.
 
 ```bash
-# 1. Clone and install
-git clone <repo-url>
+git clone https://github.com/Dev251288/underwriting-agent.git
 cd underwriting-agent
 pip install -e ".[dev]"
 
-# 2. Configure environment
-cp .env.example .env
-# Edit .env and set ANTHROPIC_API_KEY=your_key_here
+cp .env.example .env                # set ANTHROPIC_API_KEY in .env
 
-# 3. Seed the work queue with five demo applications
-python main.py seed
-
-# 4. Start the underwriter dashboard
-python main.py serve
-# Open http://127.0.0.1:8000
+python main.py seed                 # populate work queue with 5 demo apps
+python main.py serve                # dashboard at http://127.0.0.1:8000
+python main.py demo                 # full pipeline on the built-in sample
+pytest                              # all tests run without an API key
 ```
 
-To run the full AI pipeline against a sample application (requires API key):
+## Implementation notes
 
-```bash
-python main.py demo
+Every agent calls Claude with `tool_choice={"type": "tool", "name": "..."}`,
+forcing a single structured tool call whose `input_schema` is the agent's
+output contract. System prompts are marked `cache_control: {"type": "ephemeral"}`
+so they are served from cache across repeated runs within the TTL.
+
+| Layer | Choice |
+|-------|--------|
+| Agents | Anthropic Claude via `anthropic` Python SDK |
+| API server | FastAPI + Uvicorn |
+| Dashboard | Single-page HTML + Tailwind (CDN) + vanilla JS |
+| Data models | Pydantic v2 |
+| Storage | Per-application JSON in `outputs/` |
+
+## External APIs
+
+Production integrations live in `src/mocks/` as deterministic stand-ins for:
+UIDAI Aadhaar, NSDL PAN, TransUnion CIBIL, RBI Account Aggregator, State
+Land Registry. Swap each mock for a real HTTP client to go live — the agent
+contracts above don't need to change.
+
+## Indian regulatory context baked in
+
+KYC follows RBI KYC Master Directions and the PAN–Aadhaar linking mandate.
+Credit eligibility uses a CIBIL floor of 650 (with 600–649 routed to Credit
+Committee, below 600 a hard reject) and a FOIR ceiling of 50% per RBI guidance.
+LTV ceilings follow the RBI circular: 90% on loans up to ₹30L, 80% on ₹30–75L,
+75% above ₹75L; breaches within 5pp of the cap escalate to Credit Committee,
+beyond 5pp hard-reject. Property records are matched against sub-registrar
+and RERA registrations.
+
+## Repo layout
+
+```
+underwriting-agent/
+├── main.py                       # CLI: demo | serve | seed
+├── src/
+│   ├── orchestrator.py           # 7-step pipeline coordinator
+│   ├── agents/                   # one file per agent
+│   ├── mocks/                    # mock external APIs
+│   ├── models/                   # Pydantic data models
+│   └── api/                      # FastAPI dashboard
+├── tests/                        # pytest, no API key needed
+├── docs/
+│   ├── architecture.svg          # README hero
+│   └── SCREENSHOT.md             # how to capture dashboard.png
+└── outputs/                      # one JSON per processed application
 ```
 
-To run tests without an API key (all agent calls are mocked):
+## Roadmap
 
-```bash
-pytest
+Tracked in `summary.md`. Next four items: request-more-info workflow with a
+fixed customer SLA, work-queue landing page, exception-only Credit Committee
+escalation, and a dashboard redesign that collapses duplicate information into
+an expandable scorecard.
+
+## Suggested GitHub topics
+
+After pushing, set these in **Settings → General → Topics** to make the repo
+discoverable:
+
+```
+agentic-ai  claude  anthropic  multi-agent  human-in-the-loop
+fintech  mortgage  underwriting  india  rbi  python  fastapi  pydantic
 ```
 
----
+## License
 
-## Tech Stack
-
-| Layer | Technology |
-|-------|-----------|
-| AI agents | [Anthropic Claude](https://docs.anthropic.com) via `anthropic` Python SDK — structured tool-forced outputs, prompt caching |
-| API server | [FastAPI](https://fastapi.tiangolo.com) + [Uvicorn](https://www.uvicorn.org) |
-| Dashboard | Single-page HTML + Tailwind CSS (CDN) + vanilla JS — no build step |
-| Data models | [Pydantic](https://docs.pydantic.dev) v2 |
-| Storage | Per-application JSON files in `outputs/` |
-
-Every agent calls Claude with `tool_choice={"type": "tool", "name": "..."}`, forcing a single structured tool call whose `input_schema` defines the exact output shape. System prompts use `cache_control: {"type": "ephemeral"}` for prompt caching across repeated runs.
-
----
-
-## External API Mocks
-
-All third-party data calls in Agents 3, 4, and 5 route through mock modules in `src/mocks/`. The following return realistic deterministic test data:
-
-- **UIDAI Aadhaar API** — identity and address verification
-- **NSDL PAN API** — PAN validity and PAN–Aadhaar link status
-- **TransUnion CIBIL** — credit score and repayment history
-- **RBI Account Aggregator** — income and bank statement verification
-- **State Sub-Registrar / Land Registry** — title records and encumbrance certificates
-
-To integrate production APIs, replace the mock functions in `src/mocks/` with real HTTP clients. No other code changes are required.
-
----
-
-## Indian Regulatory Context
-
-Agent prompts and decision logic are calibrated to Indian retail mortgage policy:
-
-- **KYC**: RBI KYC Master Directions; mandatory Aadhaar OTP e-KYC; PAN–Aadhaar linking as per Income Tax Act
-- **Credit eligibility**: CIBIL score minimum 650; scores 600–649 require Credit Committee approval; below 600 is a hard reject
-- **FOIR**: Fixed Obligation to Income Ratio must not exceed 50% (RBI guideline); breaches above 50% are flagged as policy exceptions
-- **LTV caps (RBI circular)**: ≤90% for loans up to ₹30L · ≤80% for ₹30L–₹75L · ≤75% above ₹75L; breaches within 5pp of cap require Credit Committee; breaches beyond 5pp are hard rejects
-- **Documents**: Form 16 / ITR (two years), RERA-registered sale agreements, sub-registrar title records
-- **Exception escalation**: Cases with genuine policy exceptions (CIBIL band, LTV proximity, FOIR breach, or loan-to-eligibility ratio) are routed to Credit Committee with a full audit log
+MIT. See [`LICENSE`](LICENSE).
